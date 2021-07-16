@@ -5,8 +5,9 @@
 #' @param dat 
 #' @param scale.names 
 #' @param items 
-#' @param method 
+#' @param method If method = "both" the output is a list containing the first two eigenvalues and the loss function; if it "linear" or "ordinal" the primary output is loadings plots
 #' @param verbose 
+#' @param plot_both If method = "both" should the loadings plots be created?
 #'
 #' @return
 #' @export
@@ -16,7 +17,8 @@ princaller <- function(dat,
                        scale.names = NULL, 
                        items = NULL, 
                        method = "both",
-                       verbose = FALSE){
+                       verbose = FALSE,
+                       plot_both = FALSE){
   # scale.names is a vector of strings to pattern match with column names
   # items is a vector of TRUE or FALSE values to match specific columns (must match the number of columns in dataset)
   
@@ -32,7 +34,7 @@ princaller <- function(dat,
       }
       
       if (method %in% c("both", "linear")){
-        knotsexp <- knotsGifi(dat, type = "E")
+        knotsexp <- Gifi::knotsGifi(dat, type = "E")
       }
       
       if (method == "both"){
@@ -42,12 +44,19 @@ princaller <- function(dat,
         prord <- Gifi::princals(dat[,grepl(scale.names[i],names(dat))])
         out.ord[i,] <- prord$evals[1:2] # store eigenvalues for first two components for comparison of methods
         loss.ord[i] <- prord$f
-        plot(prord, main = paste("Loadings Plot: ", scale.names[i], sep = "")) 
+        
+        if (plot_both) {
+          plot(prord, main = paste("Ordinal Loadings Plot: ", scale.names[i], sep = "")) 
+          plot(prlin, main = paste("Linear Loadings Plot: ", scale.names[i], sep = "")) 
+        }
       }
-      
-      if (method == "linear"){
+      else if (method == "linear"){
         prlin <- Gifi::princals(dat[,grepl(scale.names[i],names(dat))], knots = knotsexp, degrees = 1)
-        plot(prlin, main = paste("Loadings Plot: ", scale.names[i], sep = "")) 
+        plot(prlin, main = paste("Linear Loadings Plot: ", scale.names[i], sep = "")) 
+      }
+      else if (method == "ordinal"){
+        prord <- Gifi::princals(dat[,grepl(scale.names[i],names(dat))])
+        plot(prord, main = paste("Ordinal Loadings Plot: ", scale.names[i], sep = "")) 
       }
     }
   }
@@ -61,6 +70,9 @@ princaller <- function(dat,
   
   if (method == "both"){
     return(list(out.lin=out.lin,out.ord=out.ord,loss.lin=loss.lin,loss.ord=loss.ord))
+  }
+  else{
+    return(0)
   }
 }
 
@@ -122,7 +134,7 @@ grmit <- function(dat, # full dataset
 #' @export
 #'
 #' @examples
-itemplotter <- function(out, guesspar=TRUE){
+itemplotter <- function(out, type = "trace", guesspar=TRUE, ...){
   for (i in 1:length(out)){
     ncur <- out[[i]]$mirt.out@Data$nitems
     for (j in 1:ncur){
@@ -136,7 +148,12 @@ itemplotter <- function(out, guesspar=TRUE){
           par(mfrow=c(ncur/4,4))
         }
       }
-      print(itemplot(out[[i]]$mirt.out,j))
+      tmp_plot <- mirt::itemplot(out[[i]]$mirt.out,
+                                 j,
+                                 main = paste(type, "plot for",
+                                              names(grmit_out5_1[[i]]$coef[j])),
+                                 ...)
+      print(tmp_plot)
     }
   }
   if (guesspar){
