@@ -150,6 +150,7 @@ itemplotter <- function(out, type = "trace", guesspar=TRUE, ...){
       }
       tmp_plot <- mirt::itemplot(out[[i]]$mirt.out,
                                  j,
+                                 type = type,
                                  main = paste(type, "plot for",
                                               names(grmit_out5_1[[i]]$coef[j])),
                                  ...)

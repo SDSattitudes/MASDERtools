@@ -4,7 +4,7 @@
 \alias{itemplotter}
 \title{Generate the item plots from grmit}
 \usage{
-itemplotter(out, guesspar = TRUE)
+itemplotter(out, type = "trace", guesspar = TRUE, ...)
 }
 \arguments{
 \item{out}{}
