@@ -1,5 +1,17 @@
 
 
+#' Runs princals and can compare linear vs. ordinal
+#'
+#' @param dat 
+#' @param scale.names 
+#' @param items 
+#' @param method 
+#' @param verbose 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 princaller <- function(dat, 
                        scale.names = NULL, 
                        items = NULL, 
@@ -24,17 +36,17 @@ princaller <- function(dat,
       }
       
       if (method == "both"){
-        prlin <- princals(dat[,grepl(scale.names[i],names(dat))], knots = knotsexp, degrees = 1)
+        prlin <- Gifi::princals(dat[,grepl(scale.names[i],names(dat))], knots = knotsexp, degrees = 1)
         out.lin[i,] <- prlin$evals[1:2] # store eigenvalues for first two components for comparison of methods
         loss.lin[i] <- prlin$f
-        prord <- princals(dat[,grepl(scale.names[i],names(dat))])
+        prord <- Gifi::princals(dat[,grepl(scale.names[i],names(dat))])
         out.ord[i,] <- prord$evals[1:2] # store eigenvalues for first two components for comparison of methods
         loss.ord[i] <- prord$f
         plot(prord, main = paste("Loadings Plot: ", scale.names[i], sep = "")) 
       }
       
       if (method == "linear"){
-        prlin <- princals(dat[,grepl(scale.names[i],names(dat))], knots = knotsexp, degrees = 1)
+        prlin <- Gifi::princals(dat[,grepl(scale.names[i],names(dat))], knots = knotsexp, degrees = 1)
         plot(prlin, main = paste("Loadings Plot: ", scale.names[i], sep = "")) 
       }
     }
@@ -44,7 +56,7 @@ princaller <- function(dat,
     if (verbose){
       print(items)
     }
-    plot(princals(dat[,items]))
+    plot(Gifi::princals(dat[,items]))
   }
   
   if (method == "both"){
@@ -52,9 +64,20 @@ princaller <- function(dat,
   }
 }
 
+#' Runs the GRM model for each scale
+#'
+#' @param dat 
+#' @param scale.names 
+#' @param drop.items 
+#' @param verbose 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 grmit <- function(dat, # full dataset
                   scale.names = NULL, # names of scales to be analyzed
-                  drop.items = NULL, # column numbers (e.g., 1, 2, 3, 4, 5, 6, 7) to be dropped within each scale as a list
+                  drop.items = NULL, # column numbers (e.g., 1, 2, 3, 4, 5, 6, 7) to be dropped WITHIN each scale as a list
                   verbose = TRUE){
   if (!is.null(scale.names)){
     out <- list()
@@ -88,7 +111,17 @@ grmit <- function(dat, # full dataset
   }
 }
 
+# CURRENTLY NOT WORKING RIGHT
 # The par mfrow in this isn't working
+#' Generate the item plots from grmit 
+#'
+#' @param out 
+#' @param guesspar 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 itemplotter <- function(out, guesspar=TRUE){
   for (i in 1:length(out)){
     ncur <- out[[i]]$mirt.out@Data$nitems
@@ -111,6 +144,14 @@ itemplotter <- function(out, guesspar=TRUE){
   }
 }
 
+#' Title
+#'
+#' @param out 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 itemfitbuilder <- function(out){
   fitstats <- out[[1]]$itemfit
   if (length(out) > 1){
@@ -121,6 +162,18 @@ itemfitbuilder <- function(out){
   return(fitstats)
 }
 
+#' Compare PCM, GPCM, and GRM models
+#'
+#' @param dat 
+#' @param scale.names 
+#' @param drop.items 
+#' @param pval 
+#' @param verbose 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 comparer <- function(dat, # full dataset
                      scale.names = NULL, # names of scales to be analyzed
                      drop.items = NULL, # column numbers (e.g., 1, 2, 3, 4, 5, 6, 7) to be dropped within each scale. Only useful if length(scale.names) is 1.
@@ -149,14 +202,14 @@ comparer <- function(dat, # full dataset
       # this is the mirt version
       #out.grm.tmp <- mirt(dat[,grepl(scale.names[i],names(dat))],model = 1, itemtype="graded", technical=list(removeEmptyRows=TRUE))
       if (verbose) { print("Fitting GRM") }
-      fitgrm <- grm(dat.tmp)
+      fitgrm <- ltm::grm(dat.tmp)
       
       ##############
       # PCM vs. GPCM
       if (verbose) { print("Fitting PCM") }
-      fitpcm <- gpcm(dat.tmp, constraint = "rasch")
+      fitpcm <- ltm::gpcm(dat.tmp, constraint = "rasch")
       if (verbose) { print("Fitting GPCM") }
-      fitgpcm <- gpcm(dat.tmp)
+      fitgpcm <- ltm::gpcm(dat.tmp)
       a.out <- anova(fitpcm, fitgpcm)
       out.comp <- rbind(out.comp, data.frame(a.out$p.value,a.out$aic0,a.out$aic1,summary(fitgrm)$AIC))
       rownames(out.comp)[nrow(out.comp)] <- paste(scale.names[i],ifelse(is.null(drop.items),"",paste(" drop ",drop.items,sep="")),sep="")
