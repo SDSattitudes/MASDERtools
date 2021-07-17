@@ -2,12 +2,12 @@
 
 #' Runs princals and can compare linear vs. ordinal
 #'
-#' @param dat 
-#' @param scale.names 
-#' @param items 
+#' @param dat Data from items; usually a data.frame. 
+#' @param scale.names Vector of scale names; must be based on common part of item names.
+#' @param items A vector of column numbers (corresponding to columns in dat) to be plotted. Rarely used - usually leave as NULL.
 #' @param method If method = "both" the output is a list containing the first two eigenvalues and the loss function; if it "linear" or "ordinal" the primary output is loadings plots
-#' @param verbose 
-#' @param plot_both If method = "both" should the loadings plots be created?
+#' @param verbose Logical for debug purposes.
+#' @param plot_both Logical; If method = "both" should the loadings plots be created?
 #'
 #' @return
 #' @export
@@ -76,12 +76,12 @@ princaller <- function(dat,
   }
 }
 
-#' Runs the GRM model for each scale
+#' Runs the GRM model for each scale using mirt
 #'
-#' @param dat 
-#' @param scale.names 
-#' @param drop.items 
-#' @param verbose 
+#' @param dat Data from items; usually a data.frame. 
+#' @param scale.names Vector of scale names; must be based on common part of item names.
+#' @param drop.items A list of vectors of item numbers to be dropped WITHIN each scale. These are the column numbers within each scale's sub-data.frame, not the overall column numbers.
+#' @param verbose Logical for debug purposes.
 #'
 #' @return
 #' @export
@@ -127,16 +127,19 @@ grmit <- function(dat, # full dataset
 # The par mfrow in this isn't working
 #' Generate the item plots from grmit 
 #'
-#' @param out 
-#' @param guesspar 
+#' @param out A list of objects created by mirt (one object per scale). This function loops over this list.
+#' @param guesspar Old attempt at creating a grid array. NOT WORKING.
+#' @param layoutcol Integer number of figures to print per row (number of columns in a grid of images). This does not work well; better to use knitr options fig.show = "hold" and out.width = "50%" (with appropriate adjustments, e.g., 3 figures per row is 33%).
+#' @param ... Options to be passed to mirt::itemplot
 #'
 #' @return
 #' @export
 #'
 #' @examples
-itemplotter <- function(out, type = "trace", guesspar=TRUE, ...){
+itemplotter <- function(out, guesspar=FALSE, layoutcol = NULL, ...){
   for (i in 1:length(out)){
     ncur <- out[[i]]$mirt.out@Data$nitems
+    tmp_plot <- list()
     for (j in 1:ncur){
       if (guesspar){
         oldpar <- par()$mfrow
@@ -148,13 +151,26 @@ itemplotter <- function(out, type = "trace", guesspar=TRUE, ...){
           par(mfrow=c(ncur/4,4))
         }
       }
-      tmp_plot <- mirt::itemplot(out[[i]]$mirt.out,
-                                 j,
-                                 type = type,
-                                 main = paste(type, "plot for",
-                                              names(grmit_out5_1[[i]]$coef[j])),
-                                 ...)
-      print(tmp_plot)
+      tmp_plot[[j]] <- mirt::itemplot(out[[i]]$mirt.out,
+                                      j,
+                                      main = paste("Trace Lines for",
+                                                   names(grmit_out5_1[[i]]$coef[j])),
+                                      ...)
+      if (is.null(layoutcol)){
+        print(tmp_plot[[j]])
+      }
+    }
+    if (!is.null(layoutcol)){
+      #layoutrows <- ceiling(out[[i]]$mirt.out@Data$nitems / layoutcol)
+      spillover <- out[[i]]$mirt.out@Data$nitems %% layoutcol
+      #if (spillover != 0){
+      layoutmat <- matrix(c(1:out[[i]]$mirt.out@Data$nitems, 
+                            rep(0, layoutcol - spillover)),
+                          ncol = layoutcol,
+                          byrow = TRUE)
+      #}
+      #layout(layoutmat)
+      print(grid.arrange(grobs = tmp_plot, layout = layoutmat))
     }
   }
   if (guesspar){
@@ -162,9 +178,9 @@ itemplotter <- function(out, type = "trace", guesspar=TRUE, ...){
   }
 }
 
-#' Title
+#' Build a table of item fit statistics.
 #'
-#' @param out 
+#' @param out A list of mirt output objects. This function will loop over this list. 
 #'
 #' @return
 #' @export
@@ -182,11 +198,11 @@ itemfitbuilder <- function(out){
 
 #' Compare PCM, GPCM, and GRM models
 #'
-#' @param dat 
-#' @param scale.names 
-#' @param drop.items 
-#' @param pval 
-#' @param verbose 
+#' @param dat Data from items; usually a data.frame. 
+#' @param scale.names Vector of scale names; must be based on common part of item names.
+#' @param drop.items A list of vectors of item numbers to be dropped WITHIN each scale. These are the column numbers within each scale's sub-data.frame, not the overall column numbers.
+#' @param pval The p-value to use in the chi-squared test for nest models (comparing PCM and GPCM). Default value 0.01.
+#' @param verbose Logical; debug purposes.
 #'
 #' @return
 #' @export
