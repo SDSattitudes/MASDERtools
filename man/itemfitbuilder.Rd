@@ -2,16 +2,16 @@
 % Please edit documentation in R/IRT-functions.R
 \name{itemfitbuilder}
 \alias{itemfitbuilder}
-\title{Title}
+\title{Build a table of item fit statistics.}
 \usage{
 itemfitbuilder(out)
 }
 \arguments{
-\item{out}{}
+\item{out}{A list of mirt output objects. This function will loop over this list.}
 }
 \value{
 
 }
 \description{
-Title
+Build a table of item fit statistics.
 }

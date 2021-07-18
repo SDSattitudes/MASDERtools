@@ -60,12 +60,12 @@ create_links_EFA <- function(loadings,
 #'
 #' @examples
 make_sankey_EFA <- function(loadings, ...){
-  if ("fa" %in% class(efa_out5_f5)){
+  if ("fa" %in% class(loadings)){
     warning("This function expects factor loadings. Guessing that this is an fa object and continuing.")
     loadings <- loadings$loadings
   }
   sank_out <- create_links_EFA(loadings, ...)
-  p <- sankeyNetwork(Links = sank_out[[1]], Nodes = sank_out[[2]],
+  p <- networkD3::sankeyNetwork(Links = sank_out[[1]], Nodes = sank_out[[2]],
                      Source = "IDsource", Target = "IDtarget",
                      Value = "value", NodeID = "name", 
                      fontSize = 14, nodeWidth = 30, 

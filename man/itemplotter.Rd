@@ -4,12 +4,16 @@
 \alias{itemplotter}
 \title{Generate the item plots from grmit}
 \usage{
-itemplotter(out, type = "trace", guesspar = TRUE, ...)
+itemplotter(out, guesspar = FALSE, layoutcol = NULL, ...)
 }
 \arguments{
-\item{out}{}
+\item{out}{A list of objects created by mirt (one object per scale). This function loops over this list.}
 
-\item{guesspar}{}
+\item{guesspar}{Old attempt at creating a grid array. NOT WORKING.}
+
+\item{layoutcol}{Integer number of figures to print per row (number of columns in a grid of images). This does not work well; better to use knitr options fig.show = "hold" and out.width = "50\%" (with appropriate adjustments, e.g., 3 figures per row is 33\%).}
+
+\item{...}{Options to be passed to mirt::itemplot}
 }
 \value{
 

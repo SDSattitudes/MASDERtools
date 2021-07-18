@@ -142,19 +142,19 @@ itemplotter <- function(out, guesspar=FALSE, layoutcol = NULL, ...){
     tmp_plot <- list()
     for (j in 1:ncur){
       if (guesspar){
-        oldpar <- par()$mfrow
+        oldpar <- graphics::par()$mfrow
         if (ncur %% 3){
-          par(mfrow=c(ncur/3,3))
+          graphics::par(mfrow=c(ncur/3,3))
         }
         #        else if(ncur %% 4){
         else{
-          par(mfrow=c(ncur/4,4))
+          graphics::par(mfrow=c(ncur/4,4))
         }
       }
       tmp_plot[[j]] <- mirt::itemplot(out[[i]]$mirt.out,
                                       j,
                                       main = paste("Trace Lines for",
-                                                   names(grmit_out5_1[[i]]$coef[j])),
+                                                   names(out[[i]]$coef[j])),
                                       ...)
       if (is.null(layoutcol)){
         print(tmp_plot[[j]])
@@ -170,11 +170,11 @@ itemplotter <- function(out, guesspar=FALSE, layoutcol = NULL, ...){
                           byrow = TRUE)
       #}
       #layout(layoutmat)
-      print(grid.arrange(grobs = tmp_plot, layout = layoutmat))
+      print(gridExtra::grid.arrange(grobs = tmp_plot, layout = layoutmat))
     }
   }
   if (guesspar){
-    par(mfrow=oldpar)
+    graphics::par(mfrow=oldpar)
   }
 }
 
@@ -244,7 +244,7 @@ comparer <- function(dat, # full dataset
       fitpcm <- ltm::gpcm(dat.tmp, constraint = "rasch")
       if (verbose) { print("Fitting GPCM") }
       fitgpcm <- ltm::gpcm(dat.tmp)
-      a.out <- anova(fitpcm, fitgpcm)
+      a.out <- stats::anova(fitpcm, fitgpcm)
       out.comp <- rbind(out.comp, data.frame(a.out$p.value,a.out$aic0,a.out$aic1,summary(fitgrm)$AIC))
       rownames(out.comp)[nrow(out.comp)] <- paste(scale.names[i],ifelse(is.null(drop.items),"",paste(" drop ",drop.items,sep="")),sep="")
       

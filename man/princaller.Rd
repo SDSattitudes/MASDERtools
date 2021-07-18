@@ -14,17 +14,17 @@ princaller(
 )
 }
 \arguments{
-\item{dat}{}
+\item{dat}{Data from items; usually a data.frame.}
 
-\item{scale.names}{}
+\item{scale.names}{Vector of scale names; must be based on common part of item names.}
 
-\item{items}{}
+\item{items}{A vector of column numbers (corresponding to columns in dat) to be plotted. Rarely used - usually leave as NULL.}
 
 \item{method}{If method = "both" the output is a list containing the first two eigenvalues and the loss function; if it "linear" or "ordinal" the primary output is loadings plots}
 
-\item{verbose}{}
+\item{verbose}{Logical for debug purposes.}
 
-\item{plot_both}{If method = "both" should the loadings plots be created?}
+\item{plot_both}{Logical; If method = "both" should the loadings plots be created?}
 }
 \value{
 

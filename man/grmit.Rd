@@ -2,22 +2,22 @@
 % Please edit documentation in R/IRT-functions.R
 \name{grmit}
 \alias{grmit}
-\title{Runs the GRM model for each scale}
+\title{Runs the GRM model for each scale using mirt}
 \usage{
 grmit(dat, scale.names = NULL, drop.items = NULL, verbose = TRUE)
 }
 \arguments{
-\item{dat}{}
+\item{dat}{Data from items; usually a data.frame.}
 
-\item{scale.names}{}
+\item{scale.names}{Vector of scale names; must be based on common part of item names.}
 
-\item{drop.items}{}
+\item{drop.items}{A list of vectors of item numbers to be dropped WITHIN each scale. These are the column numbers within each scale's sub-data.frame, not the overall column numbers.}
 
-\item{verbose}{}
+\item{verbose}{Logical for debug purposes.}
 }
 \value{
 
 }
 \description{
-Runs the GRM model for each scale
+Runs the GRM model for each scale using mirt
 }

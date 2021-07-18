@@ -13,15 +13,15 @@ comparer(
 )
 }
 \arguments{
-\item{dat}{}
+\item{dat}{Data from items; usually a data.frame.}
 
-\item{scale.names}{}
+\item{scale.names}{Vector of scale names; must be based on common part of item names.}
 
-\item{drop.items}{}
+\item{drop.items}{A list of vectors of item numbers to be dropped WITHIN each scale. These are the column numbers within each scale's sub-data.frame, not the overall column numbers.}
 
-\item{pval}{}
+\item{pval}{The p-value to use in the chi-squared test for nest models (comparing PCM and GPCM). Default value 0.01.}
 
-\item{verbose}{}
+\item{verbose}{Logical; debug purposes.}
 }
 \value{
 
