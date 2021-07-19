@@ -19,7 +19,7 @@ create_links_EFA <- function(loadings,
                          value = integer())
   
   # create matrix of true/false indicating whether loading is above cutoff
-  loadings_tf <- apply(loadings, 2, function(x){x >= cutoff})
+  loadings_tf <- apply(loadings, 2, function(x){abs(x) >= cutoff})
   
   if (is.null(scale_names)){
     scale_names <- unique(gsub(pattern = "_[0-9]*",

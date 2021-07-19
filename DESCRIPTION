@@ -1,6 +1,6 @@
 Package: MASDERtools
 Title: Functions for Analyzing SOMAS/SOMADS Data
-Version: 0.0.2.0
+Version: 0.0.2.1
 Authors@R: 
     person(given = "Douglas",
            family = "Whitaker",
