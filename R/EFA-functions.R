@@ -16,10 +16,12 @@ create_links_EFA <- function(loadings,
   
   links_df <- data.frame(source = character(),
                          target = character(),
-                         value = integer())
+                         value = integer(),
+                         tooltip = character())
   
   # create matrix of true/false indicating whether loading is above cutoff
   loadings_tf <- apply(loadings, 2, function(x){abs(x) >= cutoff})
+  multi_loading <- sum(rowSums(loadings_tf) > 1) > 0
   
   if (is.null(scale_names)){
     scale_names <- unique(gsub(pattern = "_[0-9]*",
@@ -33,9 +35,12 @@ create_links_EFA <- function(loadings,
   for (i in 1:length(scale_names)){
     cur_rows_tf <- grepl(scale_names[i], rownames(loadings_tf))
     for (j in 1:ncol(loadings_tf)){
+      tmp_tooltip <- paste(rownames(loadings_tf[cur_rows_tf,])[which(loadings_tf[cur_rows_tf, j] == 1)], collapse = "\n")
+      #browser()
       tmp_df <- data.frame(source = scale_names[i],
                            target = factor_names[j],
-                           value = sum(loadings_tf[cur_rows_tf, j]))
+                           value = sum(loadings_tf[cur_rows_tf, j]),
+                           tooltip = tmp_tooltip)
       if (tmp_df$value[1] > 0){
         links_df <- rbind(links_df, tmp_df)
       }
@@ -47,9 +52,14 @@ create_links_EFA <- function(loadings,
   links_df$IDsource <- match(links_df$source, nodes$name) - 1 ### necessary step so the graph actually prints
   links_df$IDtarget <- match(links_df$target, nodes$name) - 1 ### necessary step so the graph actually prints
   return(list(links = links_df,
-              nodes = nodes))
+              nodes = nodes,
+              multi_loading = multi_loading,
+              cutoff = cutoff))
 }
 
+# based on some stack overflow code
+# https://stackoverflow.com/questions/47591824/link-not-node-tooltips-in-networkd3s-forcenetwork-and-htmlwidgets
+# https://stackoverflow.com/questions/47215310/r-customized-tooltip-in-networkd3sankeynetwork
 #' Title
 #'
 #' @param loadings Factor loadings from EFA
@@ -59,7 +69,12 @@ create_links_EFA <- function(loadings,
 #' @export
 #'
 #' @examples
-make_sankey_EFA <- function(loadings, ...){
+make_sankey_EFA <- function(loadings, 
+                            custom_html = TRUE,
+                            sankey_title = NULL,
+                            guess_title = TRUE,
+                            multi_loading_caption = TRUE,
+                            ...){
   if ("fa" %in% class(loadings)){
     warning("This function expects factor loadings. Guessing that this is an fa object and continuing.")
     loadings <- loadings$loadings
@@ -70,6 +85,30 @@ make_sankey_EFA <- function(loadings, ...){
                      Value = "value", NodeID = "name", 
                      fontSize = 14, nodeWidth = 30, 
                      sinksRight = FALSE) 
+  if (custom_html){
+    p$x$links$tooltip <- sank_out$links$tooltip
+    p <- htmlwidgets::onRender(p,
+                               '
+                             function(el, x) {
+                               d3.selectAll(".link").select("title foreignObject body pre")
+                               .text(function(d) { return d.tooltip; });
+                             }
+                             '
+    )
+    p <- htmlwidgets::appendContent(p, htmltools::tags$p("Hover over links to see which items loaded onto each factor."))
+    if (guess_title & is.null(sankey_title)){
+      sankey_title <- paste("Sankey Diagram (cutoff = ", sank_out[[4]], ")", sep = "")
+    }
+    if (!is.null(sankey_title)){
+      p$sizingPolicy$viewer$fill <- FALSE
+      p <- htmlwidgets::prependContent(p, htmltools::tags$h1(sankey_title))
+    }
+    # in the future, we can set a flag in the create_links_EFA function if an item loads onto more than one factor
+    if (multi_loading_caption & sank_out[[3]] > 0){
+      p$sizingPolicy$viewer$fill <- FALSE
+      p <- htmlwidgets::appendContent(p, htmltools::tags$p("Note: items may load onto more than one factor."))
+    }
+  }
   print(p)
 }
 
