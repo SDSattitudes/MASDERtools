@@ -36,7 +36,6 @@ create_links_EFA <- function(loadings,
     cur_rows_tf <- grepl(scale_names[i], rownames(loadings_tf))
     for (j in 1:ncol(loadings_tf)){
       tmp_tooltip <- paste(rownames(loadings_tf[cur_rows_tf,])[which(loadings_tf[cur_rows_tf, j] == 1)], collapse = "\n")
-      #browser()
       tmp_df <- data.frame(source = scale_names[i],
                            target = factor_names[j],
                            value = sum(loadings_tf[cur_rows_tf, j]),
@@ -113,6 +112,7 @@ make_sankey_EFA <- function(loadings,
       p <- htmlwidgets::appendContent(p, htmltools::tags$p("Note: items may load onto more than one factor."))
     }
   }
-  print(p)
+  #print(p)
+  return(p)
 }
 
