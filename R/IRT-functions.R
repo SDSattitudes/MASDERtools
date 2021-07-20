@@ -213,6 +213,8 @@ comparer <- function(dat, # full dataset
                      drop.items = NULL, # column numbers (e.g., 1, 2, 3, 4, 5, 6, 7) to be dropped within each scale. Only useful if length(scale.names) is 1.
                      pval = 0.01,
                      verbose = TRUE){
+  # Need to update this to run all items if scale.names = NULL 
+  # Basically just set dat.tmp <- dat and then scale.names to anything of length 1
   if (!is.null(scale.names)){
     out <- list()
     out.comp <- data.frame(LR.p.value=NULL,pcm.aic=NULL, gpcm.aic=NULL,grm.aic=NULL)
@@ -223,7 +225,7 @@ comparer <- function(dat, # full dataset
         print(scale.names[i])
       }
       
-      dat.tmp <- dat[,grepl(scale.names[i],names(dat))]
+      dat.tmp <- dat[,grepl(pattern = scale.names[i], x = colnames(dat))]
       if (!is.null(drop.items)){
         if(!is.null(drop.items[[i]])){
           dat.tmp <- dat.tmp[,-drop.items[[i]]]
