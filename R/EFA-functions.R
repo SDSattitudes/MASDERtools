@@ -63,6 +63,10 @@ create_links_EFA <- function(loadings,
 #' Title
 #'
 #' @param loadings Factor loadings from EFA
+#' @param custom_html Logical; should custom tooltips, titles, captions, etc. be added to the diagram?
+#' @param sankey_title A string indicating the title to be used. Default is NULL to work with next option.
+#' @param guess_title Logical; if sankey_title is not specified, should a title be created? Default is "Sankey Diagram (cutoff = VALUE)".
+#' @param multi_loading_caption Logical; if any items load on more than one factor, should a note be added to the diagram?
 #' @param ... Options to be passed to create_links_EFA
 #'
 #' @return

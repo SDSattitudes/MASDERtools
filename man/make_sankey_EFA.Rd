@@ -4,7 +4,14 @@
 \alias{make_sankey_EFA}
 \title{Title}
 \usage{
-make_sankey_EFA(loadings, ...)
+make_sankey_EFA(
+  loadings,
+  custom_html = TRUE,
+  sankey_title = NULL,
+  guess_title = TRUE,
+  multi_loading_caption = TRUE,
+  ...
+)
 }
 \arguments{
 \item{loadings}{Factor loadings from EFA}

@@ -1,6 +1,6 @@
 Package: MASDERtools
 Title: Functions for Analyzing SOMAS/SOMADS Data
-Version: 0.0.3.0
+Version: 0.0.3.1
 Authors@R: 
     person(given = "Douglas",
            family = "Whitaker",
@@ -13,6 +13,6 @@ License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
 Encoding: UTF-8
 LazyData: true
 Imports: 
-  Gifi, ltm, mirt, networkD3, gridExtra
+  Gifi, ltm, mirt, networkD3, gridExtra, htmlwidgets, htmltools
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.1
