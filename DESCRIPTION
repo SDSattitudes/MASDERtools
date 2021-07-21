@@ -1,13 +1,16 @@
 Package: MASDERtools
 Title: Functions for Analyzing SOMAS/SOMADS Data
-Version: 0.0.4.0
+Version: 0.0.4.1
 Authors@R: 
     person(given = "Douglas",
            family = "Whitaker",
            role = c("aut", "cre"),
-           email = "douglaas.whitaker@msvu.ca",
+           email = "douglas.whitaker@msvu.ca",
            comment = c(ORCID = "0000-0002-6895-7437"))
-Description: What the package does (one paragraph).
+Description: Internal functions for the MASDER team to use when analyzing data
+    from the SOMAS/SOMADS family of instruments. This package will likely be 
+    released publicly at some point. This material is based upon work supported 
+    by the National Science Foundation under Grant No. DUE-2013392.
 License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
     license
 Encoding: UTF-8

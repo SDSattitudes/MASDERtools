@@ -79,6 +79,7 @@ princaller <- function(dat,
     plot(Gifi::princals(dat[,items]))
   }
   
+  # currently doesn't use the return_objs flag at all - restructure this section
   if (method == "both"){
     return(list(out.lin=out.lin,
                 out.ord=out.ord,

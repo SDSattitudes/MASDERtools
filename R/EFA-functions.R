@@ -83,6 +83,7 @@ make_sankey_EFA <- function(loadings,
     loadings <- loadings$loadings
   }
   sank_out <- create_links_EFA(loadings, ...)
+  # it would be better to reference the named objects from sank_out rather than the indices
   p <- networkD3::sankeyNetwork(Links = sank_out[[1]], Nodes = sank_out[[2]],
                      Source = "IDsource", Target = "IDtarget",
                      Value = "value", NodeID = "name", 
@@ -92,11 +93,11 @@ make_sankey_EFA <- function(loadings,
     p$x$links$tooltip <- sank_out$links$tooltip
     p <- htmlwidgets::onRender(p,
                                '
-                             function(el, x) {
-                               d3.selectAll(".link").select("title foreignObject body pre")
-                               .text(function(d) { return d.tooltip; });
-                             }
-                             '
+                               function(el, x) {
+                                 d3.selectAll(".link").select("title foreignObject body pre")
+                                 .text(function(d) { return d.tooltip; });
+                               }
+                               '
     )
     p <- htmlwidgets::appendContent(p, htmltools::tags$p("Hover over links to see which items loaded onto each factor."))
     if (guess_title & is.null(sankey_title)){
