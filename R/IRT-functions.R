@@ -18,7 +18,8 @@ princaller <- function(dat,
                        items = NULL, 
                        method = "both",
                        verbose = FALSE,
-                       plot_both = FALSE){
+                       plot_both = FALSE,
+                       return_objs = TRUE){
   # scale.names is a vector of strings to pattern match with column names
   # items is a vector of TRUE or FALSE values to match specific columns (must match the number of columns in dataset)
   
@@ -26,6 +27,10 @@ princaller <- function(dat,
     out.lin <- out.ord <- matrix(data = NA, nrow = length(scale.names), ncol = 2)
     loss.lin <- loss.ord <- c()
   }
+  
+  # Advantage of returning these objects is so that one could loop over them and graph outside of this function
+  # princaller can be rather slow! No reason to run it twice unnecessarily
+  prlin_list <- prord_list <- list()
   
   if (!is.null(scale.names)){
     for (i in 1:length(scale.names)){
@@ -37,11 +42,15 @@ princaller <- function(dat,
         knotsexp <- Gifi::knotsGifi(dat, type = "E")
       }
       
+      # There's a lot of duplicated code here
+      # Might be better to do if (method == "both" | method == "linear") and the like
       if (method == "both"){
         prlin <- Gifi::princals(dat[,grepl(scale.names[i],names(dat))], knots = knotsexp, degrees = 1)
+        prlin_list[[scale.names[i]]] <- prlin
         out.lin[i,] <- prlin$evals[1:2] # store eigenvalues for first two components for comparison of methods
         loss.lin[i] <- prlin$f
         prord <- Gifi::princals(dat[,grepl(scale.names[i],names(dat))])
+        prord_list[[scale.names[i]]] <- prord
         out.ord[i,] <- prord$evals[1:2] # store eigenvalues for first two components for comparison of methods
         loss.ord[i] <- prord$f
         
@@ -52,10 +61,12 @@ princaller <- function(dat,
       }
       else if (method == "linear"){
         prlin <- Gifi::princals(dat[,grepl(scale.names[i],names(dat))], knots = knotsexp, degrees = 1)
+        prlin_list[[scale.names[i]]] <- prlin
         plot(prlin, main = paste("Linear Loadings Plot: ", scale.names[i], sep = "")) 
       }
       else if (method == "ordinal"){
         prord <- Gifi::princals(dat[,grepl(scale.names[i],names(dat))])
+        prord_list[[scale.names[i]]] <- prord
         plot(prord, main = paste("Ordinal Loadings Plot: ", scale.names[i], sep = "")) 
       }
     }
@@ -69,10 +80,24 @@ princaller <- function(dat,
   }
   
   if (method == "both"){
-    return(list(out.lin=out.lin,out.ord=out.ord,loss.lin=loss.lin,loss.ord=loss.ord))
+    return(list(out.lin=out.lin,
+                out.ord=out.ord,
+                loss.lin=loss.lin,
+                loss.ord=loss.ord,
+                prlin_list = prlin_list,
+                prord_list = prord_list))
+  } else if (method == "linear"){
+    return(list(out.lin=out.lin,
+                loss.lin=loss.lin,
+                prlin_list = prlin_list))
+  }
+  else if (method == "ordinal"){
+    return(list(out.ord=out.ord,
+                loss.ord=loss.ord,
+                prord_list = prord_list))
   }
   else{
-    return(0)
+    return(0) # probably not needed anymore 
   }
 }
 
