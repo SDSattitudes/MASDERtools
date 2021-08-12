@@ -8,6 +8,7 @@
 #' @param method If method = "both" the output is a list containing the first two eigenvalues and the loss function; if it "linear" or "ordinal" the primary output is loadings plots
 #' @param verbose Logical for debug purposes.
 #' @param plot_both Logical; If method = "both" should the loadings plots be created?
+#' @param return_objs CURRENTLY NOT USED, runs as if always TRUE. Logical; If TRUE, out.lin, loss.lin, out.ord, and loss.ord will be returned. (This is to prevent needing to run the function again.)
 #'
 #' @return
 #' @export
@@ -243,7 +244,13 @@ comparer <- function(dat, # full dataset
   # Basically just set dat.tmp <- dat and then scale.names to anything of length 1
   if (!is.null(scale.names)){
     out <- list()
-    out.comp <- data.frame(LR.p.value=NULL,pcm.aic=NULL, gpcm.aic=NULL,grm.aic=NULL)
+    out.comp <- data.frame(LR.p.value=NULL,
+                           pcm.aic=NULL, 
+                           gpcm.aic=NULL,
+                           grm.aic=NULL,
+                           pcm.bic=NULL, 
+                           gpcm.bic=NULL,
+                           grm.bic=NULL)
     
     for (i in 1:length(scale.names)){
       if (verbose){
@@ -273,9 +280,17 @@ comparer <- function(dat, # full dataset
       if (verbose) { print("Fitting GPCM") }
       fitgpcm <- ltm::gpcm(dat.tmp)
       a.out <- stats::anova(fitpcm, fitgpcm)
-      out.comp <- rbind(out.comp, data.frame(a.out$p.value,a.out$aic0,a.out$aic1,summary(fitgrm)$AIC))
+      out.comp <- rbind(out.comp, 
+                        data.frame(a.out$p.value,
+                                   summary(fitpcm)$AIC,
+                                   summary(fitgpcm)$AIC,
+                                   summary(fitgrm)$AIC,
+                                   summary(fitpcm)$BIC,
+                                   summary(fitgpcm)$BIC,
+                                   summary(fitgrm)$BIC))
       rownames(out.comp)[nrow(out.comp)] <- paste(scale.names[i],ifelse(is.null(drop.items),"",paste(" drop ",drop.items,sep="")),sep="")
       
+      # This whole section should be cleaned up.
       if (verbose){
         
         prefmodel <- ifelse(a.out$p.value < pval, "GPCM", "PCM")
@@ -297,6 +312,35 @@ comparer <- function(dat, # full dataset
         else if (whichminaic == 3){ # in case we add more models
           print("GRM preferred based on AIC")
         }
+        
+        print(paste(scale.names[i], ": BIC for PCM = ", summary(fitpcm)$BIC, sep=""))
+        print(paste(scale.names[i], ": BIC for GPCM = ", summary(fitgpcm)$BIC, sep=""))
+        print(paste(scale.names[i], ": BIC for GRM = ", summary(fitgrm)$BIC, sep=""))
+        
+        bics <- out.comp[nrow(out.comp),c(5:7)]
+        whichminbic <- which(bics == min(bics))
+        if (whichminbic == 1){ # note that these indices are from WHICH on a 3-tuple, not the columns from the output!
+          print("PCM preferred based on BIC")
+        }
+        else if (whichminbic == 2){
+          print("GPCM preferred based on BIC")
+        }
+        else if (whichminbic == 3){ # in case we add more models
+          print("GRM preferred based on BIC")
+        }
+        
+        if (whichminaic == whichminbic){
+          if (whichminbic == 1){ # note that these indices are from WHICH on a 3-tuple, not the columns from the output!
+            print("PCM preferred based on AIC and BIC")
+          }
+          else if (whichminbic == 2){
+            print("GPCM preferred based on AIC and BIC")
+          }
+          else if (whichminbic == 3){ # in case we add more models
+            print("GRM preferred based on AIC and BIC")
+          }
+        }
+        
       }
       out.tmp <- list(scale=scale.names[i],
                       drop.items=drop.items,

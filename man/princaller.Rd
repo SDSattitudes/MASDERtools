@@ -10,7 +10,8 @@ princaller(
   items = NULL,
   method = "both",
   verbose = FALSE,
-  plot_both = FALSE
+  plot_both = FALSE,
+  return_objs = TRUE
 )
 }
 \arguments{
