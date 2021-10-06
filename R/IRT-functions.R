@@ -205,6 +205,57 @@ itemplotter <- function(out, guesspar=FALSE, layoutcol = NULL, ...){
   }
 }
 
+# TO DO: Add scale names to graphs
+#' Generate the empirical plots for evaluating item fit
+#'
+#' @param out A list of objects created by mirt (one object per scale). This function loops over this list.
+#' @param guesspar Old attempt at creating a grid array. NOT WORKING.
+#' @param layoutcol Integer number of figures to print per row (number of columns in a grid of images). This does not work well; better to use knitr options fig.show = "hold" and out.width = "50%" (with appropriate adjustments, e.g., 3 figures per row is 33%).
+#' @param ... Options to be passed to mirt::itemplot
+#'
+#' @return
+#' @export
+#'
+#' @examples
+item_fit_plotter <- function(out, guesspar=FALSE, layoutcol = NULL, ...){
+  for (i in 1:length(out)){
+    ncur <- out[[i]]$mirt.out@Data$nitems
+    tmp_plot <- list()
+    for (j in 1:ncur){
+      if (guesspar){
+        oldpar <- graphics::par()$mfrow
+        if (ncur %% 3){
+          graphics::par(mfrow=c(ncur/3,3))
+        }
+        #        else if(ncur %% 4){
+        else{
+          graphics::par(mfrow=c(ncur/4,4))
+        }
+      }
+      tmp_plot[[j]] <- mirt::itemfit(out[[i]]$mirt.out,
+                                     empirical.plot = j, ...) # Figure out how to add scale names here (seems mirt explicitly specifies main)
+      if (is.null(layoutcol)){
+        print(tmp_plot[[j]])
+      }
+    }
+    if (!is.null(layoutcol)){
+      #layoutrows <- ceiling(out[[i]]$mirt.out@Data$nitems / layoutcol)
+      spillover <- out[[i]]$mirt.out@Data$nitems %% layoutcol
+      #if (spillover != 0){
+      layoutmat <- matrix(c(1:out[[i]]$mirt.out@Data$nitems, 
+                            rep(0, layoutcol - spillover)),
+                          ncol = layoutcol,
+                          byrow = TRUE)
+      #}
+      #layout(layoutmat)
+      print(gridExtra::grid.arrange(grobs = tmp_plot, layout = layoutmat))
+    }
+  }
+  if (guesspar){
+    graphics::par(mfrow=oldpar)
+  }
+}
+
 #' Build a table of item fit statistics.
 #'
 #' @param out A list of mirt output objects. This function will loop over this list. 

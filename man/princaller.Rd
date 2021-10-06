@@ -26,6 +26,8 @@ princaller(
 \item{verbose}{Logical for debug purposes.}
 
 \item{plot_both}{Logical; If method = "both" should the loadings plots be created?}
+
+\item{return_objs}{CURRENTLY NOT USED, runs as if always TRUE. Logical; If TRUE, out.lin, loss.lin, out.ord, and loss.ord will be returned. (This is to prevent needing to run the function again.)}
 }
 \value{
 
