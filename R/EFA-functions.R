@@ -1,4 +1,4 @@
-#' Title
+#' Create Links for Sankey Diagram from EFA Loadings
 #'
 #' @param loadings Factor loadings from EFA
 #' @param cutoff Minimum loading value used to determine if an item loads on a factor
@@ -57,9 +57,13 @@ create_links_EFA <- function(loadings,
 }
 
 # based on some stack overflow code
+# https://stackoverflow.com/questions/58786387/how-to-not-display-values-in-the-nodes-or-the-links-in-sankeydiagram-using-netwo
 # https://stackoverflow.com/questions/47591824/link-not-node-tooltips-in-networkd3s-forcenetwork-and-htmlwidgets
 # https://stackoverflow.com/questions/47215310/r-customized-tooltip-in-networkd3sankeynetwork
-#' Title
+# This code was essentially 2-9 lines (depending on how you count) illustrating the use of htmlwidgets::onRender to do the tooltips
+# While this code is likely not copyrightable, CJ Yetman's contribution on 2019-11-10 would by under the CC-BY-SA-4.0 license, 
+# which is one-way compatible with GPLv3. 
+#' Make Sankey Diagram from EFA Loadings
 #'
 #' @param loadings Factor loadings from EFA
 #' @param custom_html Logical; should custom tooltips, titles, captions, etc. be added to the diagram?

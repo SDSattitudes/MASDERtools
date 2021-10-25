@@ -1,6 +1,6 @@
 
 
-#' Title
+#' Build a string for CFA in lavaan based on item names
 #'
 #' @param drop.items A list of vectors of item numbers to be dropped WITHIN each scale. These are the column numbers within each scale's sub-data.frame, not the overall column numbers.
 #' @param dat The raw data so that kperscale and scale.names can be calculated instead of specified. NOT YET IMPLEMENTED.
