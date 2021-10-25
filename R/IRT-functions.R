@@ -89,14 +89,10 @@ princaller <- function(dat,
                 prlin_list = prlin_list,
                 prord_list = prord_list))
   } else if (method == "linear"){
-    return(list(out.lin=out.lin,
-                loss.lin=loss.lin,
-                prlin_list = prlin_list))
+    return(list(prlin_list = prlin_list))
   }
   else if (method == "ordinal"){
-    return(list(out.ord=out.ord,
-                loss.ord=loss.ord,
-                prord_list = prord_list))
+    return(list(prord_list = prord_list))
   }
   else{
     return(0) # probably not needed anymore 
