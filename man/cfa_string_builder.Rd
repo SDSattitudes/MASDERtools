@@ -2,7 +2,7 @@
 % Please edit documentation in R/CFA-functions.R
 \name{cfa_string_builder}
 \alias{cfa_string_builder}
-\title{Title}
+\title{Build a string for CFA in lavaan based on item names}
 \usage{
 cfa_string_builder(dat, drop.items = NULL)
 }
@@ -15,5 +15,5 @@ cfa_string_builder(dat, drop.items = NULL)
 
 }
 \description{
-Title
+Build a string for CFA in lavaan based on item names
 }

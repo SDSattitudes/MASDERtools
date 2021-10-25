@@ -2,7 +2,7 @@
 % Please edit documentation in R/EFA-functions.R
 \name{make_sankey_EFA}
 \alias{make_sankey_EFA}
-\title{Title}
+\title{Make Sankey Diagram from EFA Loadings}
 \usage{
 make_sankey_EFA(
   loadings,
@@ -30,5 +30,5 @@ make_sankey_EFA(
 
 }
 \description{
-Title
+Make Sankey Diagram from EFA Loadings
 }

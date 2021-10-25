@@ -13,7 +13,7 @@ Description: Internal functions for the MASDER team to use when analyzing data
     from the SOMAS/SOMADS family of instruments. This package will likely be 
     released publicly at some point. This material is based upon work supported 
     by the National Science Foundation under Grant No. DUE-2013392.
-License: use_gpl3_license()
+License: GPL-3
 Encoding: UTF-8
 LazyData: true
 Imports: 

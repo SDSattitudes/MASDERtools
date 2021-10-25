@@ -2,7 +2,7 @@
 % Please edit documentation in R/EFA-functions.R
 \name{create_links_EFA}
 \alias{create_links_EFA}
-\title{Title}
+\title{Create Links for Sankey Diagram from EFA Loadings}
 \usage{
 create_links_EFA(
   loadings,
@@ -24,5 +24,5 @@ create_links_EFA(
 
 }
 \description{
-Title
+Create Links for Sankey Diagram from EFA Loadings
 }
