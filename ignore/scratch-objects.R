@@ -120,3 +120,21 @@ tmp_loadings <- structure(c(0.0709583286066546, 0.742790271183717, 0.46230877429
                                                                                                                             "AcadSC_5", "AcadSC_6", "AcadSC_7", "AcadSC_8", "AcadSC_9", "EGO_1", 
                                                                                                                             "EGO_2", "EGO_3", "EGO_4", "EGO_5", "EGO_6", "EGO_7"), c("PA1", 
                                                                                                                                                                                      "PA2", "PA4", "PA3", "PA6", "PA5")), class = "loadings")
+
+tmp_pilot2_item_names <- c("Attain_1", "Attain_10", "Attain_11", "Attain_12", "Attain_13", 
+                           "Attain_2", "Attain_3", "Attain_4", "Attain_5", "Attain_6", "Attain_7", 
+                           "Attain_8", "Attain_9", "Cost_3", "Cost21_1", "Cost21_10", "Cost21_12", 
+                           "Cost12_3", "Cos21_4", "Cost21_9", "CostBen_1", "CostBen_2", 
+                           "CostBen_3", "CostBen_4", "CostBen_5", "CostBen_6", "Difficulty_1", 
+                           "Difficulty_2", "Difficulty_3", "Difficulty_4", "Difficulty_5", 
+                           "Difficulty21_11", "Difficulty21_12", "Difficulty21_7", "Difficulty21_8", 
+                           "EGO_1", "EGO_2", "EGO_3", "EGO_4", "EGO_5", "EGO_6", "EGO_7", 
+                           "EGO21_28", "EGO21_33", "EGO21_34", "EGO21_35", "EGO21_40", "EGO21_41", 
+                           "Expectancy_1", "Expectancy_2", "Expectancy_3", "Expectancy_4", 
+                           "Expectancy_5", "Expectancy_6", "IntEnj_1", "IntEnj_2", "IntEnj_3", 
+                           "IntEnj_4", "IntEnj_5", "IntEnj_6", "IntEnj_7", "IntEnj_8", "IntEnj_9", 
+                           "Utility_1", "Utility_10", "Utility_11", "Utility_2", "Utility_3", 
+                           "Utility_4", "Utility_5", "Utility_6", "Utility_7", "Utility_8", 
+                           "Utility_9", "AcadSC21_28", "AcadSC21_37", "AcadSC21_402", "AcadSC21_41", 
+                           "AcadSC21_472", "AcadSC21_492", "AcadSC21_50", "ASC_23", "ASC21_201", 
+                           "AcadSC_1", "AcadSC_2", "AcadSC_3", "AcadSC_7", "AcadSC_8")
