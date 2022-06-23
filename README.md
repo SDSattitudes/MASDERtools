@@ -14,3 +14,5 @@ If you do not have the devtools package, install it with `install.packages("devt
 ## Status
 
 The package is in a functional state for performing some standard analyses on S-SOMAS data. In addition to adding new features and fixing bugs, the documentation needs to be improved. This is a task that would be reasonable for any student to contribute to - if you are interested, contact Doug.
+
+A vignette has been created to show off some of the core features of the package.
