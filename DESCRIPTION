@@ -20,3 +20,7 @@ Imports:
   Gifi, ltm, mirt, networkD3, gridExtra, htmlwidgets, htmltools
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.1
+Suggests: 
+    rmarkdown,
+    knitr
+VignetteBuilder: knitr

@@ -1,0 +1,83 @@
+---
+title: "MASDERtools-demo"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{MASDERtools-demo}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library("MASDERtools")
+library("SATSdata")
+```
+
+# Introduction
+
+## Uses
+
+The MASDERtools package has been developed to aid in the analysis of survey data with Likert-type responses collected as part of the MASDER project (NSF DUE-2013392). It currently includes functions to simplify:
+
+* Creating sankey diagrams based on EFA loadings
+* Performing IRT analyses, specifically
+    * PCA with loadings plots on all scales
+    * Comparing PCM, GPCM, and GRM models for all scales
+    * Running GRM on all scales (as this is generally the best-fitting model)
+    * Some functions to simplify plots and tables
+* Creating the initial CFA string for lavaan
+
+## Data Format Requirements
+
+An important note is that this package **requires** items to be formatted in a specific way to automate the analyses. The following item (column) naming conventions should be used:
+
+* All items should have names of the form `Construct_X` where `Construct` is the name of the hypothesized/intended construct (or scale name) and `X` is a numerical value indicating the item number.
+* Item numbers should be from 1 to k, where k is the number of items on the scale. There should be no leading 0 values (i.e., use `Utility_3` and **not** `Utility_03`).
+* There should only be a single underscore (_) character in the item name (because this is used to identify the item number).
+
+In the future, a function will be included to rename columns to this format, but for now care should be taken to ensure your items are in this format. 
+
+## SATSdata
+
+The SATSdata package is used in this vignette. More information about this package, including installation instructions, is available [here](https://github.com/SDSattitudes/SATSdata). For the purposes of this vignette, we will only use the 36 items with post item-level data (columns 76 to 111). Note that the variable names also need to be updated, so to do this we will:
+
+* Sort the item names alphabetically
+* Identify the construct name (first 6 characters for this dataset)
+* Rename the items to Construct_X format (the original item numbers indicate the position on the overall instrument rather than within the scale)
+
+```{r SATS-prep}
+
+dat <- sats_s[,76:111]
+dat <- dat[,sort(names(dat), index.return = TRUE)$ix]
+names(dat) <- paste(substr(names(dat), 1, 6),
+                    unlist(sapply(X = table(substr(names(dat), 1, 6)), 
+                                  FUN = function(x){seq(from = 1, to = x)})), 
+                    sep = "_")
+```
+
+# Analyses 
+
+We now demonstrate some of the analyses.
+
+## Sankey Diagram from EFA Loadings
+
+We perform an EFA to extract 6 factors (the number hypothesized by the model) using the promax rotation, principle axis factoring, and polychoric correlations.
+
+```{r EFA}
+efa_out<- psych::fa(r = dat, 
+                    nfactors = 6, 
+                    rotate = "promax", 
+                    fm = "pa", 
+                    cor = "poly", 
+                    correct = 0)
+```
+
+```{r sankey}
+MASDERtools::make_sankey_EFA(efa_out$loadings, sankey_title = "EFA for SATS Post Data, cutoff = 0.40")
+```
