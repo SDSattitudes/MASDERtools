@@ -25,7 +25,7 @@ library("SATSdata")
 
 The MASDERtools package has been developed to aid in the analysis of survey data with Likert-type responses collected as part of the MASDER project (NSF DUE-2013392). It currently includes functions to simplify:
 
-* Creating sankey diagrams based on EFA loadings
+* Creating Sankey diagrams based on EFA loadings
 * Performing IRT analyses, specifically
     * PCA with loadings plots on all scales
     * Comparing PCM, GPCM, and GRM models for all scales
@@ -61,15 +61,22 @@ names(dat) <- paste(substr(names(dat), 1, 6),
                     sep = "_")
 ```
 
+Because some of these analyses take a long time, we will only use a subset of the data for illustrative purposes. We take a random sample of size 500 from the dataset.
+
+```{r SATS-subset}
+set.seed(1406)
+dat <- dat[sample(1:nrow(dat), 500),]
+```
 # Analyses 
 
 We now demonstrate some of the analyses.
 
 ## Sankey Diagram from EFA Loadings
 
-We perform an EFA to extract 6 factors (the number hypothesized by the model) using the promax rotation, principle axis factoring, and polychoric correlations.
+We perform an EFA to extract 6 factors (the number hypothesized by the model) using the promax rotation, principal axis factoring, and polychoric correlations.
 
 ```{r EFA}
+library("psych")
 efa_out<- psych::fa(r = dat, 
                     nfactors = 6, 
                     rotate = "promax", 
@@ -78,6 +85,151 @@ efa_out<- psych::fa(r = dat,
                     correct = 0)
 ```
 
-```{r sankey}
+The default cutoff for loading is 0.40.
+
+```{r Sankey1}
 MASDERtools::make_sankey_EFA(efa_out$loadings, sankey_title = "EFA for SATS Post Data, cutoff = 0.40")
 ```
+
+Hover your mouse over the links in the Sankey diagram to see a tooltip indicating which items loaded onto which factors. Custom HTML (such as tooltips) can be disabled with `custom_html = FALSE`.
+
+We now change the cutoff to 0.30, which will result in some items loading on multiple factors. 
+
+```{r Sankey2}
+MASDERtools::make_sankey_EFA(efa_out$loadings, sankey_title = "EFA for SATS Post Data, cutoff = 0.30", cutoff = 0.30)
+```
+
+A note is displayed at the bottom of this Sankey diagram indicating that some items load on more than one factor; this can be suppressed with `multi_loading_caption = FALSE`.
+
+If no options are specified, a title is guessed; this can be disabled with `guess_title = FALSE`.
+
+```{r Sankey3}
+MASDERtools::make_sankey_EFA(efa_out$loadings)
+```
+
+### Future Work
+
+There is no note printed when an item fail to load; this should be added as an option to `make_sankey_EFA`. 
+
+### Notes
+
+The `make_sankey_EFA` function draws heavily on the networkD3 and htmlwidgets packages.
+
+## Principal Components Analysis 
+
+We can use `princaller` to compare the loss functions for treating the response scale as linear or ordinal. The linear option is more parsimonious, so it should be preferred if the loss functions are similar. This function requires a vector of scale names to be passed.
+
+```{r scalenames}
+scale_names <- unique(substr(names(dat), 1, 6))
+```
+
+*Note: this function takes a while to run.*
+
+```{r princaller_loss}
+pc_out <- MASDERtools::princaller(dat = dat, scale.names = scale_names, method = "both")
+print(pc_out)
+```
+
+Based on the loss functions, the results are similar. Therefore the linear approach is used (more parsimonious).
+
+We now examine the loadings of the first two principal components. Items that measure the same construct should load in the same direction. (We use RMarkdown options to set the figure width to 50%.)
+
+```{r princaller_res}
+MASDERtools::princaller(dat = dat, scale.names = scale_names, method = "linear")
+```
+
+### Future Work
+
+The output from `princaller` with `method = "both"` should be preserved so that running it with `method = "linear"` can be sped up if the original output is passed to it. (Or another function for creating the graphs from the output should be made.) We may also wish to make the default option `method = "linear"`.
+
+## Comparing IRT Models
+
+The `comparer` function runs the PCM, GPCM, and GRM models from the ltm package. A likelihood ratio test is used to compare PCM and GPCM, and AIC and BIC are used to compare all three models. We drop Post.E (the Effort scale) because it performs so poorly that errors are thrown. 
+
+```{r comparer}
+library("ltm")
+comparer <- MASDERtools::comparer(dat = dat, scale.names = scale_names[-4])
+``` 
+
+### Future Work
+
+Graceful handling of errors can be implemented (i.e., continuing to run for the other scales). Better output could be implemented (perhaps with `cat` instead of `print`). The error caused by not manually loading ltm (`Error in gauher(k) : object 'gh' not found`) needs to be addressed; see Issue #1 on GitHub.
+
+## Running GRM Analyses
+
+The `grmit` function fits GRM for each scale using the mirt package. The function `itemplotter` creates item plots for each item. For brevity, we only analyze the first two scales.
+
+```{r grmer_1}
+grmit_out <- MASDERtools::grmit(dat = dat, scale.names = scale_names[1:2])
+MASDERtools::itemplotter(grmit_out)
+```
+
+The functions `itemfitbuilder` creates a table with fit indices for each item. This can be combined with other tools such as the kableExtra package to identify items with misfit.
+
+```{r grmer_2}
+library("kableExtra")
+itemfit_out <- MASDERtools::itemfitbuilder(grmit_out)
+itemfit_out %>% 
+  kbl() %>%
+  kable_paper("hover", full_width = FALSE) %>% 
+  column_spec(2:3, color = "white", background = ifelse(abs(itemfit_out$z.outfit) > 2, "Tomato", "DodgerBlue")) %>%
+  column_spec(4:5, color = "white", background = ifelse(abs(itemfit_out$z.infit) > 2, "Tomato", "DodgerBlue")) 
+```
+
+### Future Work
+
+Similar functions to `grmit` could be made for other IRT models (e.g., PCM, GPCM). Maybe we want to automate colour-coding the tables, too. 
+
+## CFA Functions
+
+Currently, the only CFA function currently provided is `cfa_string_builder` which will provide a string that can be used with the lavaan package with each item loading on its hypothesized/intended construct/scale. This string can then be modified by hand to do iterative model fitting (exploratory CFA). Currently only the data file is needed. An option has been implemented so that this function can be used to drop items manually without editing the string.
+
+Here is the basic use to generate a string.
+
+```{r cfa_1} 
+my_cfa_string <- cfa_string_builder(dat)
+cat(my_cfa_string)
+```
+
+We can also use this string directly in lavaan.
+
+```{r cfa_2}
+library("lavaan")
+library("semTools")
+cfa_out_1 <- lavaan::cfa(cfa_string_builder(dat), 
+                         data = dat, 
+                         ordered = names(dat))
+lavaan::fitMeasures(cfa_out_1, c("chisq", "df", "pvalue", "cfi", "tli", "rmsea.ci.lower", "rmsea", "rmsea.ci.upper", "srmr"))
+semTools::reliability(cfa_out_1)
+```
+
+We can drop individual items directly using `drop.items` where the value passed is a list of vectors of items to be dropped (or NULL for scales that have no dropped items).
+
+```{r cfa_mod}
+modificationindices(cfa_out_1, sort = TRUE, maximum.number = 20)
+```
+
+Based on this, we drop the following items:
+
+* Difficult 2 & 6
+* Affect 3
+
+We drop these items by specifying them in a list; the components are in the order of the scales (which is likely alphabetically). It might be prudent to store this string and print it to the screen for documenation purposes.
+
+```{r cfa_3}
+my_string_2 <- cfa_string_builder(dat, 
+                                  drop.items = list(c(5), # Post.A
+                                                     NULL, # Post.C
+                                                     c(2,6), # Post.D
+                                                     NULL, # Post.E
+                                                     NULL, # Post.I
+                                                     NULL)) # Post.V 
+cat(my_string_2)
+cfa_out_2 <- lavaan::cfa(my_string_2, data = dat, ordered = names(dat))
+lavaan::fitMeasures(cfa_out_2, c("chisq", "df", "pvalue", "cfi", "tli", "rmsea.ci.lower", "rmsea", "rmsea.ci.upper", "srmr"))
+semTools::reliability(cfa_out_2)
+```
+
+### Future Work
+
+Perhaps an option for `keep.items` as an alternative to `drop.items`. 
