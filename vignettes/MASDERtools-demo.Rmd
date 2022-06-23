@@ -147,7 +147,6 @@ The output from `princaller` with `method = "both"` should be preserved so that 
 The `comparer` function runs the PCM, GPCM, and GRM models from the ltm package. A likelihood ratio test is used to compare PCM and GPCM, and AIC and BIC are used to compare all three models. We drop Post.E (the Effort scale) because it performs so poorly that errors are thrown. 
 
 ```{r comparer}
-library("ltm")
 comparer <- MASDERtools::comparer(dat = dat, scale.names = scale_names[-4])
 ``` 
 
