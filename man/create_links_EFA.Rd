@@ -20,9 +20,6 @@ create_links_EFA(
 
 \item{factor_names}{Vector of factor names; optional}
 }
-\value{
-
-}
 \description{
 Create Links for Sankey Diagram from EFA Loadings
 }

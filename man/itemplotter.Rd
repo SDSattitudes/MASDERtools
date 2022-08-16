@@ -15,9 +15,6 @@ itemplotter(out, guesspar = FALSE, layoutcol = NULL, ...)
 
 \item{...}{Options to be passed to mirt::itemplot}
 }
-\value{
-
-}
 \description{
 Generate the item plots from grmit
 }

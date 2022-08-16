@@ -1,6 +1,6 @@
 Package: MASDERtools
 Title: Functions for Analyzing SOMAS/SOMADS Data
-Version: 0.0.6.1
+Version: 0.1.0
 Date: 2022
 Authors@R: 
     person(given = "Douglas",
@@ -21,7 +21,7 @@ Depends:
 Imports: 
   Gifi, mirt, networkD3, gridExtra, htmlwidgets, htmltools
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.1.1
+RoxygenNote: 7.2.0
 Suggests: 
     rmarkdown, knitr, lavaan, psych, semTools, kableExtra, SATSdata
 VignetteBuilder: knitr

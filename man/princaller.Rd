@@ -29,9 +29,6 @@ princaller(
 
 \item{return_objs}{CURRENTLY NOT USED, runs as if always TRUE. Logical; If TRUE, out.lin, loss.lin, out.ord, and loss.ord will be returned. (This is to prevent needing to run the function again.)}
 }
-\value{
-
-}
 \description{
 Runs princals and can compare linear vs. ordinal
 }

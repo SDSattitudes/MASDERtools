@@ -26,9 +26,6 @@ make_sankey_EFA(
 
 \item{...}{Options to be passed to create_links_EFA}
 }
-\value{
-
-}
 \description{
 Make Sankey Diagram from EFA Loadings
 }

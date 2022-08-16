@@ -15,9 +15,6 @@ grmit(dat, scale.names = NULL, drop.items = NULL, verbose = TRUE)
 
 \item{verbose}{Logical for debug purposes.}
 }
-\value{
-
-}
 \description{
 Runs the GRM model for each scale using mirt
 }

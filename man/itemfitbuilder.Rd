@@ -9,9 +9,6 @@ itemfitbuilder(out)
 \arguments{
 \item{out}{A list of mirt output objects. This function will loop over this list.}
 }
-\value{
-
-}
 \description{
 Build a table of item fit statistics.
 }

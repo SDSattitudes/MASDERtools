@@ -11,9 +11,6 @@ cfa_string_builder(dat, drop.items = NULL)
 
 \item{drop.items}{A list of vectors of item numbers to be dropped WITHIN each scale. These are the column numbers within each scale's sub-data.frame, not the overall column numbers.}
 }
-\value{
-
-}
 \description{
 Build a string for CFA in lavaan based on item names
 }

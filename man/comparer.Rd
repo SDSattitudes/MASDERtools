@@ -23,9 +23,6 @@ comparer(
 
 \item{verbose}{Logical; debug purposes.}
 }
-\value{
-
-}
 \description{
 Compare PCM, GPCM, and GRM models
 }
