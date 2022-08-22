@@ -213,7 +213,7 @@ Based on this, we drop the following items:
 * Difficult 2 & 6
 * Affect 3
 
-We drop these items by specifying them in a list; the components are in the order of the scales (which is likely alphabetically). It might be prudent to store this string and print it to the screen for documenation purposes.
+We drop these items by specifying them in a list; the components are in the order of the scales (which is likely alphabetically). It might be prudent to store this string and print it to the screen for documentation purposes.
 
 ```{r cfa_3}
 my_string_2 <- cfa_string_builder(dat, 
