@@ -57,7 +57,18 @@ model_string_builder <- function(dat = NULL,
   # Now we generate the requested string.
   
   if ("cfa" %in% str_type){
-    make_cfa_string()
+    cfa_string <- make_cfa_string(scale_names = scale_names,
+                                  keep_items = keep_items)
+    if (!is.null(combo_scales)){
+      newstr <- ""
+      for (i in 1:length(combo_scales)){
+        tmpstr <- paste(names(combo_scales)[i], " =~ ",
+                        paste(combo_scales[[i]], sep = "", collapse = " + "),
+                        "\n", sep = "")
+        newstr <- paste(newstr, tmpstr)
+      }
+      cfa_string <- paste(cfa_string, newstr, sep = "")
+    }
   }
   if ("mirt" %in% str_type){
     make_mirt_string()
@@ -65,6 +76,8 @@ model_string_builder <- function(dat = NULL,
   if ("bfactor" %in% str_type){
     
   }
+  
+  return(cfa_string)
 }
 
 convert_drop_to_keep_list <- function(scale_names, kperscale, drop_items){
@@ -85,6 +98,21 @@ convert_drop_to_keep_list <- function(scale_names, kperscale, drop_items){
   return(keep_items)
 }
 
-mirt_string_builder <- function(dat, drop_items = NULL, keep_items = NULL){
+# Helper function to build the CFA string for lavaan from keep_items
+# This will also subset the dataset appropriately (keep correct columns)
+make_mirt_string <- function(scale_names, keep_items, dat){
   
+}
+
+# Helper function to build the CFA string for lavaan from keep_items
+make_cfa_string <- function(scale_names, keep_items){
+  outstr <- "\n"
+  for (i in 1:length(scale_names)){
+    tmpstr <- paste(scale_names[i], " =~ ",
+                    paste(scale_names[i], "_", keep_items[[i]], # Item name
+                          sep = "", collapse = " + "), # Separate items with +
+                    "\n", sep = "")
+    outstr <- paste(outstr, tmpstr)
+  }
+  return(outstr)
 }
