@@ -1,7 +1,7 @@
 Package: MASDERtools
 Title: Functions for Analyzing SOMAS/SOMADS Data
 Version: 0.1.2
-Date: 2022
+Date: 2023
 Authors@R: 
     person(given = "Douglas",
            family = "Whitaker",
