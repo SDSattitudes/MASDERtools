@@ -88,7 +88,6 @@ model_string_builder <- function(dat = NULL,
                                             keep_items = keep_items,
                                             dat = dat)
     # Account for custom scale definitions
-    # TO DO: add missing columns in!
     if (!is.null(combo_scales)){
       newstr <- ""
       for (i in 1:length(combo_scales)){
@@ -96,6 +95,18 @@ model_string_builder <- function(dat = NULL,
                         paste(combo_scales[[i]], sep = "", collapse = ","),
                         "\n", sep = "")
         newstr <- paste(newstr, tmpstr)
+        
+        # Now we add back in missing columns needed for combo_scales
+        # First check for missing columns
+        if (sum(!(combo_scales[[i]] %in% 
+                  colnames(mirt_string_and_dat[["mirt_subdat"]]))) > 0){
+          mirt_string_and_dat[["mirt_subdat"]] <- 
+            cbind(mirt_string_and_dat[["mirt_subdat"]],
+                  dat[,colnames(dat) %in% 
+                        combo_scales[[i]][!(
+                          combo_scales[[i]] %in% 
+                            colnames(mirt_string_and_dat[["mirt_subdat"]]))]])
+        }
       }
       mirt_string_and_dat[["mirt_string"]] <- 
         paste(mirt_string_and_dat[["mirt_string"]], newstr, sep = "")
@@ -130,12 +141,12 @@ make_bfactor_vec <- function(scale_names, keep_items, dat){
     scale_vec <- c(scale_vec, rep(i, length(keep_items[[i]])))
     # Create a vector to use in selecting the data columns
     item_vec <- c(item_vec, 
-                  paste(scale_names[i], "_", keep_items[[i]], sep = "")
+                  paste(scale_names[i], "_", keep_items[[i]], sep = ""))
   }
   subdat <- dat[,colnames(dat) %in% item_vec] 
   
   return(list(bfactor_vec = scale_vec,
-              bfactor_subdat = subdat)
+              bfactor_subdat = subdat))
 }
 
 # Helper function to build the mirt.model string
@@ -154,14 +165,14 @@ make_mirt_string <- function(scale_names, keep_items, dat){
     
     # Create a vector to use in selecting the data columns
     item_vec <- c(item_vec, 
-                  paste(scale_names[i], "_", keep_items[[i]], sep = "")
+                  paste(scale_names[i], "_", keep_items[[i]], sep = ""))
   }
   
   # Now we subset the data (order of columns should not matter)
   subdat <- dat[,colnames(dat) %in% item_vec] 
   
   return(list(mirt_string = outstr,
-              mirt_subdat = subdat)
+              mirt_subdat = subdat))
 }
 
 # Helper function to build the CFA string for lavaan from keep_items
