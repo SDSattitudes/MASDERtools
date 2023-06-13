@@ -2,7 +2,8 @@ model_string_builder <- function(dat = NULL,
                                  scale_names = NULL, kperscale = NULL, 
                                  drop_items = NULL, keep_items = NULL,
                                  str_type = c("cfa", "mirt", "bfactor"),
-                                 combo_scales = NULL){
+                                 combo_scales = NULL,
+                                 simplify = TRUE){
   
   # Get the scale names from the stem of the item
   # This assumes that the items are of the form ScaleName_ItemNumber, e.g.,
@@ -56,9 +57,15 @@ model_string_builder <- function(dat = NULL,
   # We now have the list of items we want to keep. 
   # Now we generate the requested string.
   
+  output <- list()
+  
+  # Confirmatory Factor Analysis
+  
   if ("cfa" %in% str_type){
+    # Make basic string
     cfa_string <- make_cfa_string(scale_names = scale_names,
                                   keep_items = keep_items)
+    # Account for custom scale definitions
     if (!is.null(combo_scales)){
       newstr <- ""
       for (i in 1:length(combo_scales)){
@@ -69,16 +76,107 @@ model_string_builder <- function(dat = NULL,
       }
       cfa_string <- paste(cfa_string, newstr, sep = "")
     }
+    # Prepare object for return
+    output[["cfa"]] <- cfa_string
   }
+  
+  # Multidimensional Item Response Theory (for mirt.model function)
+  
   if ("mirt" %in% str_type){
-    make_mirt_string()
+    # Make basic string
+    mirt_string_and_dat <- make_mirt_string(scale_names = scale_names,
+                                            keep_items = keep_items,
+                                            dat = dat)
+    # Account for custom scale definitions
+    # TO DO: add missing columns in!
+    if (!is.null(combo_scales)){
+      newstr <- ""
+      for (i in 1:length(combo_scales)){
+        tmpstr <- paste(names(combo_scales)[i], " = ",
+                        paste(combo_scales[[i]], sep = "", collapse = ","),
+                        "\n", sep = "")
+        newstr <- paste(newstr, tmpstr)
+      }
+      mirt_string_and_dat[["mirt_string"]] <- 
+        paste(mirt_string_and_dat[["mirt_string"]], newstr, sep = "")
+    }
+    output[["mirt"]] <- mirt_string_and_dat
   }
+  
+  # Multidimensional Item Response Theory Bi-Factor model (for bfactor function)
   if ("bfactor" %in% str_type){
+    bfactor_vec_and_dat <- make_bfactor_vec(scale_names = scale_names,
+                                            keep_items = keep_items,
+                                            dat = dat)
+    output[["bfactor"]] <- bfactor_vec_and_dat
     
   }
   
-  return(cfa_string)
+  if (simplify & length(output) == 1){
+    return(output[[1]])
+  }
+  else{
+    return(output)
+  }
 }
+
+
+# Makes the vector for using mirt::bfactor (not technically a string)
+# As with the other function for mirt, this creates a data subset
+make_bfactor_vec <- function(scale_names, keep_items, dat){
+  scale_vec <- item_vec <- c()
+  for (i in 1:length(scale_names)){
+    # Create the vector of scale codes 
+    scale_vec <- c(scale_vec, rep(i, length(keep_items[[i]])))
+    # Create a vector to use in selecting the data columns
+    item_vec <- c(item_vec, 
+                  paste(scale_names[i], "_", keep_items[[i]], sep = "")
+  }
+  subdat <- dat[,colnames(dat) %in% item_vec] 
+  
+  return(list(bfactor_vec = scale_vec,
+              bfactor_subdat = subdat)
+}
+
+# Helper function to build the mirt.model string
+# This will also subset the dataset appropriately (keep correct columns)
+make_mirt_string <- function(scale_names, keep_items, dat){
+  
+  outstr <- "\n"
+  item_vec <- c()
+  for (i in 1:length(scale_names)){
+    # Create the string
+    tmpstr <- paste(scale_names[i], " = ",
+                    paste(scale_names[i], "_", keep_items[[i]], # Item name
+                          sep = "", collapse = ","), # Separate items with +
+                    "\n", sep = "")
+    outstr <- paste(outstr, tmpstr)
+    
+    # Create a vector to use in selecting the data columns
+    item_vec <- c(item_vec, 
+                  paste(scale_names[i], "_", keep_items[[i]], sep = "")
+  }
+  
+  # Now we subset the data (order of columns should not matter)
+  subdat <- dat[,colnames(dat) %in% item_vec] 
+  
+  return(list(mirt_string = outstr,
+              mirt_subdat = subdat)
+}
+
+# Helper function to build the CFA string for lavaan from keep_items
+make_cfa_string <- function(scale_names, keep_items){
+  outstr <- "\n"
+  for (i in 1:length(scale_names)){
+    tmpstr <- paste(scale_names[i], " =~ ",
+                    paste(scale_names[i], "_", keep_items[[i]], # Item name
+                          sep = "", collapse = " + "), # Separate items with +
+                    "\n", sep = "")
+    outstr <- paste(outstr, tmpstr)
+  }
+  return(outstr)
+}
+
 
 convert_drop_to_keep_list <- function(scale_names, kperscale, drop_items){
   keep_items <- list()
@@ -98,21 +196,3 @@ convert_drop_to_keep_list <- function(scale_names, kperscale, drop_items){
   return(keep_items)
 }
 
-# Helper function to build the CFA string for lavaan from keep_items
-# This will also subset the dataset appropriately (keep correct columns)
-make_mirt_string <- function(scale_names, keep_items, dat){
-  
-}
-
-# Helper function to build the CFA string for lavaan from keep_items
-make_cfa_string <- function(scale_names, keep_items){
-  outstr <- "\n"
-  for (i in 1:length(scale_names)){
-    tmpstr <- paste(scale_names[i], " =~ ",
-                    paste(scale_names[i], "_", keep_items[[i]], # Item name
-                          sep = "", collapse = " + "), # Separate items with +
-                    "\n", sep = "")
-    outstr <- paste(outstr, tmpstr)
-  }
-  return(outstr)
-}
