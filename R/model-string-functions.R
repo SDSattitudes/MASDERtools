@@ -48,11 +48,12 @@ model_string_builder <- function(dat = NULL,
     }
   }
   # nothing specified - assume user wants to keep all items
-  else {
+  else if (is.null(drop_items) & is.null(keep_items)){
     for (i in 1:length(scale_names)){
       keep_items[[scale_names[i]]] <- c(1:kperscale[[scale_names[i]]])
     }
   }
+  # No else needed - the remaining condition is only keep_items is specified
   
   # We now have the list of items we want to keep. 
   # Now we generate the requested string.
@@ -119,6 +120,41 @@ model_string_builder <- function(dat = NULL,
     bfactor_vec_and_dat <- make_bfactor_vec(scale_names = scale_names,
                                             keep_items = keep_items,
                                             dat = dat)
+    # Account for custom scale definitions
+    # This probably will NOT work if items included in the new scale definitions
+    #   are already included in another scale. That is, if one or more items are
+    #   are set to load on more than one factor then the bfactor vector will not
+    #   have the length equal to the number of columns in the dataset. This 
+    #   might very well be an intentional limit based on the bifactor theory.
+    if (!is.null(combo_scales)){
+      tmpvec <- c()
+      for (i in 1:length(combo_scales)){
+        tmpvec <- c(tmpvec, 
+                    rep(length(scale_names) + i, length(combo_scales[[i]])))
+        
+        # Now we add back in missing columns needed for combo_scales
+        # First check for missing columns
+        # This might be worth moving to its own helper function considering
+        #   that it is almost identical to code above.
+        if (sum(!(combo_scales[[i]] %in% 
+                  colnames(bfactor_vec_and_dat[["bfactor_subdat"]]))) > 0){
+          bfactor_vec_and_dat[["bfactor_subdat"]] <- 
+            cbind(bfactor_vec_and_dat[["bfactor_subdat"]],
+                  dat[,colnames(dat) %in% 
+                        combo_scales[[i]][!(
+                          combo_scales[[i]] %in% 
+                            colnames(
+                              bfactor_vec_and_dat[["bfactor_subdat"]]))]])
+        }
+      }
+      bfactor_vec_and_dat[["bfactor_vec"]] <- 
+        c(bfactor_vec_and_dat[["bfactor_vec"]], tmpvec)
+      if (length(bfactor_vec_and_dat[["bfactor_vec"]]) != 
+          ncol(bfactor_vec_and_dat[["bfactor_subdat"]])){
+        warning(paste("Mismatch between vector length and number of columns.", 
+                      "Check combo_scales specification."))
+      }
+    }
     output[["bfactor"]] <- bfactor_vec_and_dat
     
   }

@@ -10,7 +10,7 @@
 #'
 #' @examples
 cfa_string_builder <- function(dat, drop.items = NULL){
-
+  .Deprecated("model_string_builder")
   scale.names <- unique(gsub(pattern = "_[0-9]*",
                              replacement = "",
                              x = names(dat)))
