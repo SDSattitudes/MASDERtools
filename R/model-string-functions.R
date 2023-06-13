@@ -1,3 +1,18 @@
+#' Create Model Strings for Analysis Functions Based on List of Items
+#'
+#' @param dat Dataset to be analyzed. If provided, scale_names and kpersecale will be computed from this (assumes data uses internal MASDER naming convention). This is necessary if str_type is "mirt" or "bfactor".
+#' @param scale_names A vector of scale names. Determined from dat if provided.
+#' @param kperscale A table of the number of items per scale. Determined from dat if provided.
+#' @param drop_items A list of vectors of item numbers to drop for each scale; named components are okay. Any scales that will not have any items dropped should be indicated with NULL instead of a vector of item numbers to drop.
+#' @param keep_items A list of vectors of item numbers to keep for each scale; named components are okay. This format is preferred to drop_items. If no items to drop or keep are provided, all items in dat will be kept.
+#' @param str_type A string indicating what type of analysis the function should build a string for: "cfa" indicates a simple factor structure for use in lavaan, "mirt" indicates a correlated traits model for use with the mirt::mirt.model function, and "bfactor" indicates a bifactor model for use with mirt::bfactor.
+#' @param combo_scales A list of additional scales and items. This is needed if scales will be created that do not use the typical naming convention. 
+#' @param simplify Logical; if TRUE and str_type is of length 1, an outer list will not be returned, just the value of the component of the list.
+#'
+#' @return List with named components if simplify = FALSE or str_type has length 2 or more.
+#' @export
+#'
+#' @examples
 model_string_builder <- function(dat = NULL, 
                                  scale_names = NULL, kperscale = NULL, 
                                  drop_items = NULL, keep_items = NULL,
