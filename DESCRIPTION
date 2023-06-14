@@ -21,7 +21,7 @@ Depends:
 Imports: 
   Gifi, mirt, networkD3, gridExtra, htmlwidgets, htmltools
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.2.0
+RoxygenNote: 7.2.3
 Suggests: 
     rmarkdown, knitr, lavaan, psych, semTools, kableExtra, SATSdata
 VignetteBuilder: knitr
