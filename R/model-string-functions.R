@@ -1,3 +1,5 @@
+# TO DO: for mirt model, need to include correlations
+
 #' Create Model Strings for Analysis Functions Based on List of Items
 #'
 #' @param dat Dataset to be analyzed. If provided, scale_names and kpersecale will be computed from this (assumes data uses internal MASDER naming convention). This is necessary if str_type is "mirt" or "bfactor".
@@ -257,4 +259,3 @@ convert_drop_to_keep_list <- function(scale_names, kperscale, drop_items){
   }
   return(keep_items)
 }
-
