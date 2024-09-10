@@ -8,7 +8,8 @@ create_links_EFA(
   loadings,
   cutoff = 0.4,
   scale_names = NULL,
-  factor_names = NULL
+  factor_names = NULL,
+  item_suffix_regex = NULL
 )
 }
 \arguments{
@@ -19,6 +20,8 @@ create_links_EFA(
 \item{scale_names}{Vector of scale names; optional (must be based on common part of item names)}
 
 \item{factor_names}{Vector of factor names; optional}
+
+\item{item_suffix_regex}{String; a regular expression passed to identify the part of the item names that is NOT part of the construct name. This is used to dynamically generate construct names based on the provided data with the default for the MASDER style names. That is, in the item acad_sc_10, this regular expression matches _10. As an alternative, scale_names can be specified so regular expressions can be avoided.}
 }
 \description{
 Create Links for Sankey Diagram from EFA Loadings

@@ -10,6 +10,7 @@ make_sankey_EFA(
   sankey_title = NULL,
   guess_title = TRUE,
   multi_loading_caption = TRUE,
+  item_suffix_regex = "_([^_]*)$",
   ...
 )
 }
@@ -23,6 +24,8 @@ make_sankey_EFA(
 \item{guess_title}{Logical; if sankey_title is not specified, should a title be created? Default is "Sankey Diagram (cutoff = VALUE)".}
 
 \item{multi_loading_caption}{Logical; if any items load on more than one factor, should a note be added to the diagram?}
+
+\item{item_suffix_regex}{String; a regular expression passed to identify the part of the item names that is NOT part of the construct name. This is used to dynamically generate construct names based on the provided data with the default for the MASDER style names. That is, in the item acad_sc_10, this regular expression matches _10. As an alternative, scale_names can be specified so regular expressions can be avoided.}
 
 \item{...}{Options to be passed to create_links_EFA}
 }

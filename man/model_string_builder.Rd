@@ -12,7 +12,8 @@ model_string_builder(
   keep_items = NULL,
   str_type = c("cfa", "mirt", "bfactor"),
   combo_scales = NULL,
-  simplify = TRUE
+  simplify = TRUE,
+  item_suffix_regex = "_([^_]*)$"
 )
 }
 \arguments{
@@ -31,6 +32,8 @@ model_string_builder(
 \item{combo_scales}{A list of additional scales and items. This is needed if scales will be created that do not use the typical naming convention.}
 
 \item{simplify}{Logical; if TRUE and str_type is of length 1, an outer list will not be returned, just the value of the component of the list.}
+
+\item{item_suffix_regex}{String; a regular expression passed to identify the part of the item names that is NOT part of the construct name. This is used to dynamically generate construct names based on the provided data with the default for the MASDER style names. That is, in the item acad_sc_10, this regular expression matches _10. As an alternative, scale_names can be specified so regular expressions can be avoided.}
 }
 \value{
 List with named components if simplify = FALSE or str_type has length 2 or more.
