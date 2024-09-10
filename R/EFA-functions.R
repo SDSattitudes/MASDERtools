@@ -4,6 +4,8 @@
 #' @param cutoff Minimum loading value used to determine if an item loads on a factor
 #' @param scale_names Vector of scale names; optional (must be based on common part of item names)
 #' @param factor_names Vector of factor names; optional
+#' @param display_dnl Logical; should items that do not load be added to the diagram? If TRUE, a group called "Did not load" will be included on the diagram. Intended to be inherited from make_sankey_EFA
+
 #'
 #' @return
 #' @export
@@ -12,7 +14,8 @@
 create_links_EFA <- function(loadings, 
                              cutoff = 0.40, 
                              scale_names = NULL, 
-                             factor_names = NULL){
+                             factor_names = NULL,
+                             display_dnl){
   
   links_df <- data.frame(source = character(),
                          target = character(),
@@ -29,7 +32,13 @@ create_links_EFA <- function(loadings,
                                x = rownames(loadings)))
   }
   if (is.null(factor_names)){
-    factor_names <- paste("Factor",1:ncol(loadings_tf),sep="")
+    factor_names <- paste("Factor", 1:ncol(loadings_tf), sep="")
+  }
+  
+  # we create a fictitious column for variables that "load" on the "Do not load" factor
+  if (display_dnl){
+    loadings_tf <- cbind(loadings_tf, c(rowSums(loadings_tf) == 0))
+    factor_names <- c(factor_names, "Did not load")
   }
   
   for (i in 1:length(scale_names)){
@@ -66,6 +75,7 @@ create_links_EFA <- function(loadings,
 #' Make Sankey Diagram from EFA Loadings
 #'
 #' @param loadings Factor loadings from EFA
+#' @param display_dnl Logical; should items that do not load be added to the diagram? If TRUE, a group called "Did not load" will be included on the diagram.
 #' @param custom_html Logical; should custom tooltips, titles, captions, etc. be added to the diagram?
 #' @param sankey_title A string indicating the title to be used. Default is NULL to work with next option.
 #' @param guess_title Logical; if sankey_title is not specified, should a title be created? Default is "Sankey Diagram (cutoff = VALUE)".
@@ -77,6 +87,7 @@ create_links_EFA <- function(loadings,
 #'
 #' @examples
 make_sankey_EFA <- function(loadings, 
+                            display_dnl = FALSE,
                             custom_html = TRUE,
                             sankey_title = NULL,
                             guess_title = TRUE,
@@ -86,7 +97,7 @@ make_sankey_EFA <- function(loadings,
     warning("This function expects factor loadings. Guessing that this is an fa object and continuing.")
     loadings <- loadings$loadings
   }
-  sank_out <- create_links_EFA(loadings, ...)
+  sank_out <- create_links_EFA(loadings, display_dnl = display_dnl, ...)
   # it would be better to reference the named objects from sank_out rather than the indices
   p <- networkD3::sankeyNetwork(Links = sank_out[[1]], Nodes = sank_out[[2]],
                      Source = "IDsource", Target = "IDtarget",
