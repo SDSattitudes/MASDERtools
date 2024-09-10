@@ -28,7 +28,7 @@ model_string_builder <- function(dat = NULL,
   # This is the naming convention used by MASDER - it must be followed for 
   # the functions in MASDERtools to work.
   if (is.null(scale_names) & !is.null(dat)){
-    scale_names <- unique(gsub(pattern = "_[0-9]*",
+    scale_names <- unique(gsub(pattern = "_([^_]*)",
                                replacement = "",
                                x = names(dat)))
   }
