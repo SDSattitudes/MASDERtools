@@ -7,11 +7,12 @@
 #' @param kperscale A table of the number of items per scale. Determined from dat if provided.
 #' @param drop_items A list of vectors of item numbers to drop for each scale; named components are okay. Any scales that will not have any items dropped should be indicated with NULL instead of a vector of item numbers to drop.
 #' @param keep_items A list of vectors of item numbers to keep for each scale; named components are okay. This format is preferred to drop_items. If no items to drop or keep are provided, all items in dat will be kept.
+#' @param override_numbers Logical; needing this parameter is problematic. In its current state, the model_string_builder is set up to assume each item is numbered 1 through k in its construct to support dropping/keeping items more easily. This needs to change, but for now this option can be used by setting it to FALSE to produce model strings based on all items with the item numbers as given in the original dataset. 
 #' @param str_type A string indicating what type of analysis the function should build a string for: "cfa" indicates a simple factor structure for use in lavaan, "mirt" indicates a correlated traits model for use with the mirt::mirt.model function, and "bfactor" indicates a bifactor model for use with mirt::bfactor.
 #' @param combo_scales A list of additional scales and items. This is needed if scales will be created that do not use the typical naming convention. 
 #' @param simplify Logical; if TRUE and str_type is of length 1, an outer list will not be returned, just the value of the component of the list.
 #' @param item_suffix_regex String; a regular expression passed to identify the part of the item names that is NOT part of the construct name. This is used to dynamically generate construct names based on the provided data with the default for the MASDER style names. That is, in the item acad_sc_10, this regular expression matches _10. As an alternative, scale_names can be specified so regular expressions can be avoided.
-#'
+#' @param item_prefix_regex String; a regular expression passed to identify the part of the item names that is NOT part of the item number. This is used to dynamically generate item numbers names based on the provided data with the default for the MASDER style names. That is, in the item acad_sc_10, this regular expression matches acad_sc_. This is only necessary when specifying override_numbers = FALSE.
 #' @return List with named components if simplify = FALSE or str_type has length 2 or more.
 #' @export
 #'
@@ -19,10 +20,12 @@
 model_string_builder <- function(dat = NULL, 
                                  scale_names = NULL, kperscale = NULL, 
                                  drop_items = NULL, keep_items = NULL,
+                                 override_numbers = TRUE,
                                  str_type = c("cfa", "mirt", "bfactor"),
                                  combo_scales = NULL,
                                  simplify = TRUE,
-                                 item_suffix_regex = "_([^_]*)$"){
+                                 item_suffix_regex = "_([^_]*)$",
+                                 item_prefix_regex = "^(.*)_(?!.*_)"){
   
   # Get the scale names from the stem of the item
   # This assumes that the items are of the form ScaleName_ItemNumber, e.g.,
@@ -56,8 +59,14 @@ model_string_builder <- function(dat = NULL,
   # Now we obtain the items to include in the analysis.
   # Best case scenario: the user specifies keep_items and we have a list to use.
   # If they specify drop_items we convert that to a keep_items list.
-  
   # If both drop_items and keep_items are used, return an error.
+  #
+  # *** THIS SECTION SHOULD BE REWRITTEN to allow for either 1:k items OR the 
+  # original item names/numbers (based on override_numbers). ***
+  #
+  # It might also be a really good idea to redo some of this with stringr 
+  # instead of base R.
+  #
   if (!is.null(drop_items) & !is.null(keep_items)){
     stop("Cannot specify both drop_items and keep_items.")
   }
@@ -75,7 +84,21 @@ model_string_builder <- function(dat = NULL,
   # nothing specified - assume user wants to keep all items
   else if (is.null(drop_items) & is.null(keep_items)){
     for (i in 1:length(scale_names)){
-      keep_items[[scale_names[i]]] <- c(1:kperscale[[scale_names[i]]])
+      if (override_numbers == TRUE){
+        keep_items[[scale_names[i]]] <- c(1:kperscale[[scale_names[i]]])
+      }
+      else{
+        keep_items[[scale_names[i]]] <- 
+          as.numeric(
+            gsub(pattern = item_prefix_regex, 
+                 x = names(dat)[grepl(
+                   pattern = paste("\\b", # boundary, detect only when the start of the string (this allows us to match "cost" to "cost_1" but not to "agg_cost_1")
+                                   scale_names[i], 
+                                   sep = ""),
+                   x = names(dat))], 
+                 replacement = "", 
+                 perl = TRUE))
+      }
     }
   }
   # No else needed - the remaining condition is only keep_items is specified

@@ -70,3 +70,18 @@ big_out2 <- model_string_builder(dat = data_scales_rc_training,
                                  drop_items = drop_items0,
                                  str_type = "bfactor",
                                  combo_scales = list(NegValue = c("Attain_1", "Attain_10", "Cost_1", "Cost_7")))
+
+
+
+tmp_dat <- readr::read_csv(file = "../data-cleaning/data/confidential-identified/S-SOMAS/operational/ssomas-op-data-constructs-imputed-testing5.csv")
+tmp_dat2 <- data.frame(tmp_dat)[,1:(ncol(tmp_dat)-2)]
+dat <- tmp_dat2
+scale_names = NULL
+kperscale = NULL
+drop_items = NULL
+keep_items = NULL
+override_numbers = TRUE
+item_suffix_regex = "_([^_]*)$"
+item_prefix_regex = "^(.*)_(?!.*_)"
+names(dat)
+cat(model_string_builder(dat, str_type = "cfa", override_numbers = FALSE))
