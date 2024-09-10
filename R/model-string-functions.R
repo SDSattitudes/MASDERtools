@@ -10,6 +10,7 @@
 #' @param str_type A string indicating what type of analysis the function should build a string for: "cfa" indicates a simple factor structure for use in lavaan, "mirt" indicates a correlated traits model for use with the mirt::mirt.model function, and "bfactor" indicates a bifactor model for use with mirt::bfactor.
 #' @param combo_scales A list of additional scales and items. This is needed if scales will be created that do not use the typical naming convention. 
 #' @param simplify Logical; if TRUE and str_type is of length 1, an outer list will not be returned, just the value of the component of the list.
+#' @param item_suffix_regex String; a regular expression passed to identify the part of the item names that is NOT part of the construct name. This is used to dynamically generate construct names based on the provided data with the default for the MASDER style names. That is, in the item acad_sc_10, this regular expression matches _10. As an alternative, scale_names can be specified so regular expressions can be avoided.
 #'
 #' @return List with named components if simplify = FALSE or str_type has length 2 or more.
 #' @export
@@ -20,7 +21,8 @@ model_string_builder <- function(dat = NULL,
                                  drop_items = NULL, keep_items = NULL,
                                  str_type = c("cfa", "mirt", "bfactor"),
                                  combo_scales = NULL,
-                                 simplify = TRUE){
+                                 simplify = TRUE,
+                                 item_suffix_regex = "_([^_]*)"){
   
   # Get the scale names from the stem of the item
   # This assumes that the items are of the form ScaleName_ItemNumber, e.g.,
@@ -28,7 +30,7 @@ model_string_builder <- function(dat = NULL,
   # This is the naming convention used by MASDER - it must be followed for 
   # the functions in MASDERtools to work.
   if (is.null(scale_names) & !is.null(dat)){
-    scale_names <- unique(gsub(pattern = "_([^_]*)",
+    scale_names <- unique(gsub(pattern = item_suffix_regex,
                                replacement = "",
                                x = names(dat)))
   }

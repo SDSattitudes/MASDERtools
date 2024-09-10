@@ -61,7 +61,7 @@ princaller <- function(dat,
         }
       }
       else if (method == "linear"){
-        prlin <- Gifi::princals(dat[,grepl(scale.names[i],names(dat))], knots = knotsexp, degrees = 1)
+        prlin <- Gifi::princals(dat[,grepl(scale.names[i],names(dat))], levels = rep("ordinal", ncol(dat)), degrees = 1)
         prlin_list[[scale.names[i]]] <- prlin
         plot(prlin, main = paste("Linear Loadings Plot: ", scale.names[i], sep = "")) 
       }
