@@ -22,7 +22,7 @@ model_string_builder <- function(dat = NULL,
                                  str_type = c("cfa", "mirt", "bfactor"),
                                  combo_scales = NULL,
                                  simplify = TRUE,
-                                 item_suffix_regex = "_([^_]*)"){
+                                 item_suffix_regex = "_([^_]*)$"){
   
   # Get the scale names from the stem of the item
   # This assumes that the items are of the form ScaleName_ItemNumber, e.g.,
@@ -30,18 +30,24 @@ model_string_builder <- function(dat = NULL,
   # This is the naming convention used by MASDER - it must be followed for 
   # the functions in MASDERtools to work.
   if (is.null(scale_names) & !is.null(dat)){
-    scale_names <- unique(gsub(pattern = item_suffix_regex,
-                               replacement = "",
-                               x = names(dat)))
+    # scale_names <- unique(gsub(pattern = item_suffix_regex,
+    #                            replacement = "",
+    #                            x = names(dat)))
+    scale_names <- identify_scale_names(item_names = names(dat),
+                                        item_suffix_regex = item_suffix_regex)
   }
   else {
     stop("Scale names must be specified or raw data provided.")
   }
   # Identify the number of items per scale
   if (is.null(kperscale) & !is.null(dat)){
-    kperscale <- table(gsub(x = names(dat),
-                            pattern = "_[0-9]*",
-                            replacement = ""))
+    # kperscale <- table(gsub(x = names(dat),
+    #                         pattern = "_[0-9]*",
+    #                         replacement = ""))
+    kperscale <- identify_scale_names(item_names = names(dat),
+                                      item_suffix_regex = item_suffix_regex,
+                                      output = "item_counts")
+    
   }
   else {
     stop("Number of items per scale must be specified or raw data provided.")
@@ -260,4 +266,27 @@ convert_drop_to_keep_list <- function(scale_names, kperscale, drop_items){
     }
   }
   return(keep_items)
+}
+
+# This function takes care of code recycled across multiple functions.
+# The item_names object should be the result of using the names() or rownames() 
+# functions, but because different objects are used at different times only the
+# output of the names should be passed and not the original object 
+# (e.g., data/loadings).
+identify_scale_names <- function(item_names, 
+                                 output = c("scale_names"),
+                                 #item_suffix_regex = "_([^_]*)"){
+                                 item_suffix_regex){
+  modified_item_names <- gsub(pattern = item_suffix_regex,
+                              replacement = "",
+                              x = item_names)
+  # scale_names <- unique(gsub(pattern = item_suffix_regex,
+  #                            replacement = "",
+  #                            x = item_names))
+  if (output == "scale_names"){
+    return(unique(modified_item_names))
+  }
+  else if (output == "item_counts"){
+    return(table(modified_item_names))
+  }
 }

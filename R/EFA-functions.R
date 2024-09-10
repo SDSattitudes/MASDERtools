@@ -4,6 +4,7 @@
 #' @param cutoff Minimum loading value used to determine if an item loads on a factor
 #' @param scale_names Vector of scale names; optional (must be based on common part of item names)
 #' @param factor_names Vector of factor names; optional
+#' @param item_suffix_regex String; a regular expression passed to identify the part of the item names that is NOT part of the construct name. This is used to dynamically generate construct names based on the provided data with the default for the MASDER style names. That is, in the item acad_sc_10, this regular expression matches _10. As an alternative, scale_names can be specified so regular expressions can be avoided.
 #'
 #' @return
 #' @export
@@ -12,7 +13,8 @@
 create_links_EFA <- function(loadings, 
                              cutoff = 0.40, 
                              scale_names = NULL, 
-                             factor_names = NULL){
+                             factor_names = NULL,
+                             item_suffix_regex = NULL){
   
   links_df <- data.frame(source = character(),
                          target = character(),
@@ -24,9 +26,11 @@ create_links_EFA <- function(loadings,
   multi_loading <- sum(rowSums(loadings_tf) > 1) > 0
   
   if (is.null(scale_names)){
-    scale_names <- unique(gsub(pattern = "_[0-9]*",
-                               replacement = "",
-                               x = rownames(loadings)))
+    # scale_names <- unique(gsub(pattern = "_[0-9]*",
+    #                            replacement = "",
+    #                            x = rownames(loadings)))
+    scale_names <- identify_scale_names(item_names = rownames(loadings),
+                                        item_suffix_regex = item_suffix_regex)
   }
   if (is.null(factor_names)){
     factor_names <- paste("Factor",1:ncol(loadings_tf),sep="")
@@ -70,6 +74,7 @@ create_links_EFA <- function(loadings,
 #' @param sankey_title A string indicating the title to be used. Default is NULL to work with next option.
 #' @param guess_title Logical; if sankey_title is not specified, should a title be created? Default is "Sankey Diagram (cutoff = VALUE)".
 #' @param multi_loading_caption Logical; if any items load on more than one factor, should a note be added to the diagram?
+#' @param item_suffix_regex String; a regular expression passed to identify the part of the item names that is NOT part of the construct name. This is used to dynamically generate construct names based on the provided data with the default for the MASDER style names. That is, in the item acad_sc_10, this regular expression matches _10. As an alternative, scale_names can be specified so regular expressions can be avoided.
 #' @param ... Options to be passed to create_links_EFA
 #'
 #' @return
@@ -81,12 +86,13 @@ make_sankey_EFA <- function(loadings,
                             sankey_title = NULL,
                             guess_title = TRUE,
                             multi_loading_caption = TRUE,
+                            item_suffix_regex = "_([^_]*)$",
                             ...){
   if ("fa" %in% class(loadings)){
     warning("This function expects factor loadings. Guessing that this is an fa object and continuing.")
     loadings <- loadings$loadings
   }
-  sank_out <- create_links_EFA(loadings, ...)
+  sank_out <- create_links_EFA(loadings, item_suffix_regex = item_suffix_regex, ...)
   # it would be better to reference the named objects from sank_out rather than the indices
   p <- networkD3::sankeyNetwork(Links = sank_out[[1]], Nodes = sank_out[[2]],
                      Source = "IDsource", Target = "IDtarget",
