@@ -15,7 +15,12 @@ create_links_EFA <- function(loadings,
                              cutoff = 0.40, 
                              scale_names = NULL, 
                              factor_names = NULL,
-                             display_dnl){
+                             #display_notes = TRUE,
+                             display_dnl = FALSE,
+                             dnl_string = "Did not load"){
+  # Some variables we can toggle later if needed
+  adding_dnl_column <- FALSE
+  nonloading_items <- FALSE 
   
   links_df <- data.frame(source = character(),
                          target = character(),
@@ -24,7 +29,22 @@ create_links_EFA <- function(loadings,
   
   # create matrix of true/false indicating whether loading is above cutoff
   loadings_tf <- apply(loadings, 2, function(x){abs(x) >= cutoff})
+  
+  # check to see if any items load on more than one factor (cross-loading)
   multi_loading <- sum(rowSums(loadings_tf) > 1) > 0
+  
+  # check to see if any items did not load (based on user choice about displaying)
+  
+  items_that_do_not_load <- (rowSums(loadings_tf) == 0)
+  
+  if (sum(items_that_do_not_load) > 0){ # if there are any...
+    nonloading_items <- TRUE
+    if (display_dnl){
+    # check to see if any did not load
+      adding_dnl_column <- TRUE
+      loadings_tf <- cbind(loadings_tf, DNL = items_that_do_not_load) # bind the vector to the array 
+    }
+  }
   
   if (is.null(scale_names)){
     scale_names <- unique(gsub(pattern = "_[0-9]*",
@@ -32,19 +52,26 @@ create_links_EFA <- function(loadings,
                                x = rownames(loadings)))
   }
   if (is.null(factor_names)){
-    factor_names <- paste("Factor", 1:ncol(loadings_tf), sep="")
+    factor_names <- paste("Factor", 1:ncol(loadings_tf), sep = "")
+    if (adding_dnl_column){ # only if the column was actually cbinded onto the array...
+      factor_names[ncol(loadings_tf)] <- dnl_string # ... do we overwrite the last factor name 
+    }
+  } else { # if the user is supplying factor names...
+    if (adding_dnl_column){ # ... and we are adding a DNL column...
+      factor_names <- c(factor_names, dnl_string) # ... add the appropriate string to the factor names
+    }
   }
   
-  # we create a fictitious column for variables that "load" on the "Do not load" factor
-  if (display_dnl){
-    loadings_tf <- cbind(loadings_tf, c(rowSums(loadings_tf) == 0))
-    factor_names <- c(factor_names, "Did not load")
-  }
+  # # we create a fictitious column for variables that "load" on the "Do not load" factor
+  # if (display_dnl){
+  #   loadings_tf <- cbind(loadings_tf, c(rowSums(loadings_tf) == 0))
+  #   factor_names <- c(factor_names, "Did not load")
+  # }
   
   for (i in 1:length(scale_names)){
     cur_rows_tf <- grepl(scale_names[i], rownames(loadings_tf))
     for (j in 1:ncol(loadings_tf)){
-      tmp_tooltip <- paste(rownames(loadings_tf[cur_rows_tf,])[which(loadings_tf[cur_rows_tf, j] == 1)], collapse = "\n")
+      tmp_tooltip <- paste(rownames(loadings_tf[cur_rows_tf, ])[which(loadings_tf[cur_rows_tf, j] == 1)], collapse = "\n")
       tmp_df <- data.frame(source = scale_names[i],
                            target = factor_names[j],
                            value = sum(loadings_tf[cur_rows_tf, j]),
@@ -62,6 +89,7 @@ create_links_EFA <- function(loadings,
   return(list(links = links_df,
               nodes = nodes,
               multi_loading = multi_loading,
+              nonloading_items = nonloading_items,
               cutoff = cutoff))
 }
 
@@ -91,7 +119,7 @@ make_sankey_EFA <- function(loadings,
                             custom_html = TRUE,
                             sankey_title = NULL,
                             guess_title = TRUE,
-                            multi_loading_caption = TRUE,
+                            display_text_notes = TRUE,
                             ...){
   if ("fa" %in% class(loadings)){
     warning("This function expects factor loadings. Guessing that this is an fa object and continuing.")
@@ -99,11 +127,18 @@ make_sankey_EFA <- function(loadings,
   }
   sank_out <- create_links_EFA(loadings, display_dnl = display_dnl, ...)
   # it would be better to reference the named objects from sank_out rather than the indices
-  p <- networkD3::sankeyNetwork(Links = sank_out[[1]], Nodes = sank_out[[2]],
-                     Source = "IDsource", Target = "IDtarget",
-                     Value = "value", NodeID = "name", 
-                     fontSize = 14, nodeWidth = 30, 
-                     sinksRight = FALSE) 
+  p <- 
+    networkD3::sankeyNetwork(
+      Links = sank_out$links, 
+      Nodes = sank_out$nodes,
+      Source = "IDsource",
+      Target = "IDtarget",
+      Value = "value", 
+      NodeID = "name", 
+      fontSize = 14, 
+      nodeWidth = 30, 
+      sinksRight = FALSE
+    ) 
   if (custom_html){
     p$x$links$tooltip <- sank_out$links$tooltip
     p <- htmlwidgets::onRender(p,
@@ -114,19 +149,26 @@ make_sankey_EFA <- function(loadings,
                                }
                                '
     )
-    p <- htmlwidgets::appendContent(p, htmltools::tags$p("Hover over links to see which items loaded onto each factor."))
     if (guess_title & is.null(sankey_title)){
-      sankey_title <- paste("Sankey Diagram (cutoff = ", sank_out[[4]], ")", sep = "")
+      sankey_title <- paste("Sankey Diagram (cutoff = ", sank_out$cutoff, ")", sep = "")
     }
     if (!is.null(sankey_title)){
       p$sizingPolicy$viewer$fill <- FALSE
       p <- htmlwidgets::prependContent(p, htmltools::tags$h1(sankey_title))
     }
     # in the future, we can set a flag in the create_links_EFA function if an item loads onto more than one factor
-    if (multi_loading_caption & sank_out[[3]] > 0){
-      p$sizingPolicy$viewer$fill <- FALSE
-      p <- htmlwidgets::appendContent(p, htmltools::tags$p("Note: items may load onto more than one factor."))
+    if (display_text_notes){
+      p <- htmlwidgets::appendContent(p, htmltools::tags$p("Hover over links to see which items loaded onto each factor."))
+      
+      if (sank_out$multi_loading == TRUE){
+        p$sizingPolicy$viewer$fill <- FALSE
+        p <- htmlwidgets::appendContent(p, htmltools::tags$p("Note: some items load onto more than one factor (cross-loading)."))
+      }
+      if (sank_out$nonloading_items == TRUE){
+        p <- htmlwidgets::appendContent(p, htmltools::tags$p("Note: some items did not load onto any factor (DNL)."))
+      }
     }
+
   }
   #print(p)
   return(p)
